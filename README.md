@@ -6,11 +6,11 @@ Suite of notes and scripts for the drought project.
 
 
 
-### Ancestry mapping using ancestry hmm
+# Ancestry mapping using ancestry hmm
 
 ## Processing results from ancestry_hmm output
 
-# Step (1) : gather all samples in one file
+### Step (1) : gather all samples in one file
 Threshold for probability of 0.9
 
 ```
