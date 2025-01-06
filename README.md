@@ -23,7 +23,7 @@ folder_name=$(basename "$PWD")
 output_file="${folder_name}_values.txt"
 
 #initialize dataset with chrom and pos
-awk '{print $1,$2}' P11_Ag_11_T.posterior > $output_file
+awk 'BEGIN { OFS="\t" } {print $1,$2}' P11_Ag_11_T.posterior > $output_file
 
 #loop through each individual and paste information to previous version of the file
 for file in *.posterior; do
