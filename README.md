@@ -64,6 +64,10 @@ done
 
 #check: file is 786262 lines and 284 columns (chromosome, position and 282 individuals).
 
+```
+
+### Visualize : plot ancestry by chromosome in R
+
 # GWAS on ancestry calls
 
 ## (1) Using a "manual" logistic model with and without covariate
@@ -82,7 +86,5 @@ These scripts require the sample order vector ("samp_order_noout.txt"), the phen
 
 
 
-```
 
-### Visualize : plot ancestry by chromosome in R
 
