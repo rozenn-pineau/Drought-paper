@@ -62,7 +62,25 @@ for file in *.posterior; do
 
 done
 
-#check: file is 786262 lines and 284 columns (chromosome, position and 282 individuals). 
+#check: file is 786262 lines and 284 columns (chromosome, position and 282 individuals).
+
+# GWAS on ancestry calls
+
+## (1) Using a "manual" logistic model with and without covariate
+
+We ran logistic regression model in R based on the ancestry calls and using PC1 as a covariate using the following R scripts : without covariate - [gwas_ancestry_logistic_v2.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/gwas_ancestry_logistic_v2.R) and with covariate - [gwas_ancestry_logistic_covariate_v2.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/gwas_ancestry_logistic_covariate_v2.R).
+These scripts require the sample order vector ("samp_order_noout.txt"), the phenotypes ("drought_phenos.txt") and the PC information ("PCA_output_noout.txt").
+
+
+## (2) using GEMMA with and without relatedness matrix
+
+
+
+
+
+
+
+
 
 ```
 
