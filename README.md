@@ -68,6 +68,9 @@ done
 
 ### Visualize : plot ancestry by chromosome in R
 
+We used the following script [plot_ancestry.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/plot_ancestry.R) to visualize ancestry per chromosome for each smaple in the dataset, ordered by longitude. 
+
+
 # GWAS on ancestry calls
 
 ## (1) Using a "manual" logistic model with and without covariate
