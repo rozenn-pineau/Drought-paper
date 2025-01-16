@@ -81,7 +81,33 @@ These scripts require the sample order vector ("samp_order_noout.txt"), the phen
 
 ## (2) using GEMMA with and without relatedness matrix
 
+```
 
+```
+
+For the genotype-based relatedness matrix, a bit of sample reordering was necessary and done in R :
+
+```
+#goal: to re order the relatedness matrix built from genotypes such that it matches the ancestry call order
+rm(list= ls())
+
+#load relatedness matrix 
+mat <- read.table("/project/kreiner/drought/gwas_episode3/output/merged_numericChr_nooutliers_maf01.cXX.txt", sep = "\t", header = F)#280 x 280
+
+#load order of samples in rm
+order_mat <- read.table("/project/kreiner/drought/gwas_episode3/prep_files/merged_numericChr_nooutliers_maf01.fam", sep = " ", header=F)
+
+#load order of samples in ancestry calls
+order_goal <- read.table("/scratch/midway3/rozennpineau/drought/ancestry_hmm/manual_gwas/samp_order_noout.txt", sep = "\t", header = F)
+
+#order matrix based on order of samples in order_goal
+#template : vector1[order(match(vector1,vector2))] 
+new_order <- order(match(order_mat[,1], order_goal[,1]))
+new_mat <- mat[new_order, new_order]
+
+#export
+write.table(new_mat, "/scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/relatedness_matrix_geno_ordered.txt", sep = "\t", col.names = F, row.names = F)
+```
 
 
 
