@@ -82,6 +82,35 @@ These scripts require the sample order vector ("samp_order_noout.txt"), the phen
 ## (2) using GEMMA with and without relatedness matrix
 
 ```
+#!/bin/bash
+#SBATCH --job-name=gemma
+#SBATCH --output=gemma.out
+#SBATCH --error=gemma.err
+#SBATCH --time=25:00:00
+#SBATCH --partition=caslake
+#SBATCH --account=pi-kreiner
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem-per-cpu=100G   # memory per cpu-core
+
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/two_pulse_flexible_prop_2
+
+anc_file=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/two_pulse_flexible_prop_2_values.gemma
+phenos=/scratch/midway3/rozennpineau/drought/ancestry_hmm/manual_gwas/phenos_ordered_noout.txt
+geno_relatedness=/scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/relatedness_matrix_geno_ordered.txt
+
+module load gemma
+gemma -g $anc_file -p $phenos -lm #gwas not corrected for population structure
+
+#gemma gwas corrected for pop structure
+##with genotype-based relatedness matrix
+gemma -g $anc_file -p $phenos -k $geno_relatedness -km 1 -lmm -o geno_corrected_gemma_gwas
+
+##with anc covariate, first generating relatedness matrix (-gk)
+
+gemma -g $anc_file -p $phenos -gk 1 -o ancestryrelatedness #generate relatedness
+gemma -g $anc_file  -p $phenos -k output/ancestryrelatedness.cXX.txt -lmm -o ancestry_corrected_gemma_gwas
+
 
 ```
 
