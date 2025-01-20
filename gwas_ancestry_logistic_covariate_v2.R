@@ -1,10 +1,11 @@
+#goal: calculate logistic regression between ancestry and survival (day to full wilt) per each position in the genome
 library(tidyverse)
 library(data.table)
 rm(list= ls())
 
 # values is a matrix with the ancestry information for each site (rows) and each individual (columns)
 setwd("/scratch/midway3/rozennpineau/drought/ancestry_hmm/manual_gwas/two_pulse_flexible_prop_2")
-values <- read.table("/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/two_pulse_flexible_prop_2_values.txt", sep = "\t", header = T)
+values <- read.table("/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/NAs/two_pulse_flexible_prop_2_cutoff_08_v2.txt", sep = "\t", header = T)
 #rm outliers
 values <- values[,-c(which(colnames(values) == "P16_Nat_1_T" | colnames(values) == "P12_Nat_14_T"))] #282 samples
 #check
@@ -32,7 +33,7 @@ pc_ordered <- pc[order(match(pc$samp,samp_order$V1)),]
 
 
 #rm file if already present
-filename <- "logistic_covariate_regression_results.txt"
+filename <- "logistic_covariate_regression_results_cutoff_08.txt"
 if (file.exists(filename)) {file.remove(filename)}
 #make header
 export <- c("chrom", "pos", "pval", "pvalcov", "zval", "zvalcov", "slope", "slopecov", "slope_err", "slope_err_cov")
@@ -55,7 +56,7 @@ for (i in 1:dim(vals)[1]) {
   zval <- tmp$`t value`[2] #test stat value for phenotype
   zvalcov <- tmp$`t value`[3] #test stat for covariate
   slope <- tmp$Estimate[2]
-  slopecov <- tmp$Estimate
+  slopecov <- tmp$Estimate[3]
   slope_error <- tmp$`Std. Error`[2]
   slope_error_cov <- tmp$`Std. Error`[3]
   b0 <- tmp$Estimate[1]
