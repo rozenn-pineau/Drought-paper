@@ -15,11 +15,17 @@ Ancestry_hmm gives as an output one file per sample, that has the following head
 chrom	position	2,0,0	1,1,0	1,0,1	0,2,0	0,1,1	0,0,2
 ```
 "2,0,0" column has the probability that the loci was homozygote for var. tuberculatus before hybridization, and stayed homozygote for var. tuberculatus at pulse 2 and 3 (0 chromosomes from var. rudis). GT = 0
+
 "1,1,0" column has the probability that the loci was heterozygote for var. tuberculatus before hybridization, and became heterozygote for var. rudis at pulse 2 (1 chromosome from var. rudis). GT = 1
+
 "1,0,1" column has the probability that the loci was heterozygote for var. tuberculatus before hybridization, and became heterozygote for var. rudis at pulse 3 (1 chromosome from var. rudis). GT = 1
+
 "0,2,0" column has the probability that the loci was homozygote for var. rudis before hybridization, and stayed homozygote for var. rudis (0 chromosome from var. tuberculatus). GT = 2
+
 "0,1,1" column has the probability that the loci was homozygote for var. tuberculatus before hybridization, and became gain one var. rudis loci at each pulse (1 chromosome from var. rudis). GT = 2
+
 "0,0,2" column has the probability that the loci was homozygote for var. rudis before hybridization, and became homzygote for var. rudis at pulse 3 (1 chromosome from var. rudis). GT = 2
+
 
 The probabilitiees in the columns add up to 1. 
 
@@ -47,12 +53,12 @@ for file in *.posterior; do
     NR > 1 {
     
     result = "NA";
-    if ($3 > 0.9) result = "0";
-    else if ($4 > 0.9) result = "1";
-    else if ($5 > 0.9) result = "1";
-    else if ($6 > 0.9) result = "2";
-    else if ($7 > 0.9) result = "2";
-    else if ($8 > 0.9) result = "2";
+    if ($3 > 0.8) result = "0";
+    else if ($4 > 0.8) result = "1";
+    else if ($5 > 0.8) result = "1";
+    else if ($6 > 0.8) result = "2";
+    else if ($7 > 0.8) result = "2";
+    else if ($8 > 0.8) result = "2";
     print result;
     }' $file > tmp
     
