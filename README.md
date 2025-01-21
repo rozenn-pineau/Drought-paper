@@ -29,7 +29,7 @@ chrom	position	2,0,0	1,1,0	1,0,1	0,2,0	0,1,1	0,0,2
 
 The probabilitiees in the columns add up to 1. 
 
-We choose a threshold of 0.9 to assign ancestry at each site using the following script. 
+We choose a threshold of 0.8 to assign ancestry at each site using the following script. 
 
 
 ### Step (1) : gather all samples in one file
@@ -127,7 +127,7 @@ rm -I tmp*
 
 ```
 
-Running GEMMA :
+Running GEMMA (we allowed up to 10% missing data per sample for each SNP):
 
 ```
 #!/bin/bash
