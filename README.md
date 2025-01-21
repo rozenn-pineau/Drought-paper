@@ -141,22 +141,22 @@ rm -I tmp*
 
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/two_pulse_flexible_prop_2
 
-anc_file=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/two_pulse_flexible_prop_2_values.gemma
+anc_file=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/NAs/two_pulse_flexible_prop_2_values_cutoff_08_v2.gemma
 phenos=/scratch/midway3/rozennpineau/drought/ancestry_hmm/manual_gwas/phenos_ordered_noout.txt
 geno_relatedness=/scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/relatedness_matrix_geno_ordered.txt
 
 module load gemma
-gemma -g $anc_file -p $phenos -lm #gwas not corrected for population structure
+gemma -g $anc_file -p $phenos -miss 0.1 -lm #gwas not corrected for population structure
+#-miss 0.1 is to accept up to 10% missing data per sample per SNP, will be interpolated from existing data
 
 #gemma gwas corrected for pop structure
 ##with genotype-based relatedness matrix
-gemma -g $anc_file -p $phenos -k $geno_relatedness -km 1 -lmm -o geno_corrected_gemma_gwas
+gemma -g $anc_file -p $phenos -k $geno_relatedness -km 1 -miss 0.1 -lmm -o geno_corrected_gemma_gwas
 
 ##with anc covariate, first generating relatedness matrix (-gk)
 
 gemma -g $anc_file -p $phenos -gk 1 -o ancestryrelatedness #generate relatedness
-gemma -g $anc_file  -p $phenos -k output/ancestryrelatedness.cXX.txt -lmm -o ancestry_corrected_gemma_gwas
-
+gemma -g $anc_file  -p $phenos -k output/ancestryrelatedness.cXX.txt -miss 0.1 -lmm -o ancestry_corrected_gemma_gwas
 
 ```
 
