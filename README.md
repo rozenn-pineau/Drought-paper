@@ -87,6 +87,46 @@ These scripts require the sample order vector ("samp_order_noout.txt"), the phen
 
 ## (2) using GEMMA with and without relatedness matrix
 
+To use the ancestry calls with gemma, I frist had to reformat it to bimbam format :
+
+```
+
+#!/bin/bash
+
+
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/NAs
+file=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/NAs/two_pulse_flexible_prop_2_values_cutoff_08_v2.txt
+output=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/NAs/two_pulse_flexible_prop_2_values_cutoff_08_v2.gemma
+#remove first line
+head -n +1 $file > samp.order
+
+tail -n -786261 $file > tmp
+
+#remove outlier columns
+awk -F'\t' '{for(i=1;i<=NF;i++) {if($i == "P16_Nat_1_T") printf("Column %d is outlier #1\n", i-1)}}' samp.order
+awk -F'\t' '{for(i=1;i<=NF;i++) {if($i == "P12_Nat_14_T") printf("Column %d is outlier #2\n", i-1)}}' samp.order
+#columns 29 and 104
+cut -d$'\t' --complement -f 29,104 tmp > tmp1
+
+#add fake ref to alt allele columns in positions 3 and 4
+awk 'BEGIN { FS = OFS = "\t" } {
+    for (i = 1; i <= NF; i++) {
+        if (i == 3) printf "A\tT\t"; # Add "A" and "T" before column 3
+        printf "%s%s", $i, (i < NF ? OFS : ""); # Print original column with tab separator
+    }
+    print ""; # Add newline after each row
+}' tmp1 > tmp2
+
+#replace first tab by ":", replace every remaining tab by commas, and delete column 2
+awk -F'\t' '{$1 = $1 ":" $2; print}' tmp2 > tmp3
+awk 'BEGIN { FS=" "; OFS="," } {$1=$1; print}' tmp3 > tmp4
+cut -d ',' --complement -f2 tmp4 > $output
+
+
+rm -I tmp*
+
+```
+
 ```
 #!/bin/bash
 #SBATCH --job-name=gemma
