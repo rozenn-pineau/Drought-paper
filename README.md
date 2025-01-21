@@ -87,7 +87,7 @@ These scripts require the sample order vector ("samp_order_noout.txt"), the phen
 
 ## (2) using GEMMA with and without relatedness matrix
 
-To use the ancestry calls with gemma, I frist had to reformat it to bimbam format :
+To use the ancestry calls with gemma, I first had to reformat it to bimbam format :
 
 ```
 
@@ -126,6 +126,8 @@ cut -d ',' --complement -f2 tmp4 > $output
 rm -I tmp*
 
 ```
+
+Running GEMMA :
 
 ```
 #!/bin/bash
