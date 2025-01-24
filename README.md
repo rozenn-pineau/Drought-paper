@@ -186,6 +186,24 @@ new_mat <- mat[new_order, new_order]
 write.table(new_mat, "/scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/relatedness_matrix_geno_ordered.txt", sep = "\t", col.names = F, row.names = F)
 ```
 
+We analyzed the runs from different probability cutoffs (0.5 to 0.9) and different NA content tolerance in GEMMA command line (0.05 -default-, 0.1 and 0.2). 
+We compared QQplots and Manhanttan plots from GWAS with and without covariate (ancestry and genotype-based relatedness matrices). 
+---> work in progress R script to be updated : [plot_gwas_ancestry.R)](https://github.com/rozenn-pineau/Drought-paper/blob/main/plot_gwas_ancestry.R)
+
+We obtained a promising GWAS when looking at ancestry-corrected gwas.
+
+Next step is to clump together the sites that may be in LD. We do this using plink : 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
