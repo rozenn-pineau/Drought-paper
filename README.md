@@ -87,6 +87,8 @@ These scripts require the sample order vector ("samp_order_noout.txt"), the phen
 
 ## (2) using GEMMA with and without relatedness matrix
 
+### Prepping the data for GWAS
+
 To use the ancestry calls with gemma, I first had to reformat it to bimbam format :
 
 ```
@@ -127,7 +129,7 @@ rm -I tmp*
 
 ```
 
-Running GEMMA (we allowed up to 10% missing data per sample for each SNP):
+Running GEMMA (we allowed up to 20% missing data per sample for each SNP):
 
 ```
 #!/bin/bash
@@ -185,6 +187,7 @@ new_mat <- mat[new_order, new_order]
 #export
 write.table(new_mat, "/scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/relatedness_matrix_geno_ordered.txt", sep = "\t", col.names = F, row.names = F)
 ```
+### Analyzing associated sites in R and correcting p-values
 
 We analyzed the runs from different probability cutoffs (0.5 to 0.9) and different NA content tolerance in GEMMA command line (0.05 -default-, 0.1 and 0.2). 
 We compared QQplots and Manhanttan plots from GWAS with and without covariate (ancestry and genotype-based relatedness matrices). 
@@ -192,6 +195,7 @@ We compared QQplots and Manhanttan plots from GWAS with and without covariate (a
 
 We obtained a promising GWAS when looking at ancestry-corrected gwas.
 
+### Clumping based on LD
 Next step is to clump together the sites that may be in LD. We do this using plink.
 
 First, we export the **inflated** and **FDR corrected** p-values from the association file (see above script). We will use these inflated p values to clump sites based on LD (and significance).
@@ -351,8 +355,7 @@ head -n 36 full2.bed > ancestry_gwas_filtered_sites.bed
 ```
 module load vcftools
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2
-vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filtered_sites.bed --out two_pulse_flexible_prop_2_values_ID_filtered.vcf --recode
-
+vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filtered_sites.bed --out two_pulse_flexible_prop_2_values_ID_filtered --recode
 ```
 
 output 
@@ -373,7 +376,13 @@ Outputting VCF file...
 After filtering, kept 35 out of a possible 786261 Sites
 Run Time = 4.00 seconds
 ````
-Why did we lsoe one site here ?
+Why did we lose one site here ?
+
+
+## Checking : Does ancestry predict response to drought ?
+
+Our expectation is that var. rudis ancestry is better adapted to drought than var. tuberculatus. 
+Do we see this in our ancestry calls ? This is also simply a way to make sure that our pipeline was coded correctly. 
 
 
 
