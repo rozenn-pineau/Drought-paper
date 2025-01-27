@@ -325,6 +325,62 @@ Results written to two_pulse_flexible_prop_2_clumped_100kb.clumped
 ```
 
 
+Prep the files to analyze allelic trajectories :
+
+(1) make bed file to filter ancestry calls vcf file
+
+```
+#!/bin/bash
+
+file=two_pulse_flexible_prop_2_clumped_100kb.clumped
+
+awk -F ' ' '{ print $1, $4, $5}' $file > temp.bed #extract cols 1 and 4 for position information, 5 for p value
+
+awk '{print ($2 + 1) " " $4 }' temp.bed > pos.bed #remove 1 from position in file
+
+paste temp.bed pos.bed | awk -v OFS='\t' '{print $1, $2, $4, $3}' > full.bed
+
+tail -n +2 full.bed > full2.bed #remove first line
+
+head -n 36 full2.bed > ancestry_gwas_filtered_sites.bed
+
+```
+
+(2) filter the vcf file based on the bed file
+
+```
+module load vcftools
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2
+vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filtered_sites.bed --out two_pulse_flexible_prop_2_values_ID_filtered.vcf --recode
+
+```
+
+output 
+
+```
+VCFtools - 0.1.16
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+        --vcf two_pulse_flexible_prop_2_values_ID.vcf
+        --out two_pulse_flexible_prop_2_values_ID_filtered.vcf
+        --recode
+        --bed ancestry_gwas_filtered_sites.bed
+
+After filtering, kept 282 out of 282 Individuals
+Outputting VCF file...
+        Read 36 BED file entries.
+After filtering, kept 35 out of a possible 786261 Sites
+Run Time = 4.00 seconds
+````
+Why did we lsoe one site here ?
+
+
+
+
+
+
+
 
 
 
