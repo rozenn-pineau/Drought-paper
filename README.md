@@ -192,7 +192,9 @@ We compared QQplots and Manhanttan plots from GWAS with and without covariate (a
 
 We obtained a promising GWAS when looking at ancestry-corrected gwas.
 
-Next step is to clump together the sites that may be in LD. We do this using plink : 
+Next step is to clump together the sites that may be in LD. We do this using plink.
+
+First, we export the **inflated** and **FDR corrected** p-values from the association file (see above script). We will use these inflated p values to clump sites based on LD (and significance).
 
 
 
