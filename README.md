@@ -266,11 +266,20 @@ awk 'NR <= 5 {print; next} {OFS="\t"; $3 = $1 ":" $2; print}' two_pulse_flexible
 ```
 
 (2) create plink family files (.ped and .map)
-
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2
+#make plink family files and create ID based on position information
+plink --vcf two_pulse_flexible_prop_2_values_ID.vcf --out two_pulse_flexible_prop_2_values --allow-extra-chr --recode --double-id #--set-missing-var-ids @:#\$1,\$2 --double-id
+```
 
 (3) clump sites using plink
 
-
+```
+#ancestry calls clumping
+plink --file two_pulse_flexible_prop_2_values --clump /scratch/midway3/rozennpineau/drought/ancestry_hmm/gemma_gwas/two_pulse_flexible_prop_2/miss02/output/ancestry_corrected_gemma_gwas_ID.assoc.txt --clump-kb 100 --out two_pulse_flexible_prop_2_clumped_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
+#bfile is 0.9 cutoff for ancestry calls
+#association file from gemma gwas with --miss 0.2
+```
 
 
 
