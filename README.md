@@ -288,6 +288,41 @@ plink --file two_pulse_flexible_prop_2_values --clump ancestry_corrected_inflate
 #association file from gemma gwas with --miss 0.2
 ```
 
+Output from plink --clump :
+
+
+```
+Options in effect:
+  --allow-extra-chr
+  --allow-no-sex
+  --clump ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt
+  --clump-field FDR
+  --clump-kb 100
+  --clump-p1 0.05
+  --clump-snp-field ID
+  --file two_pulse_flexible_prop_2_values
+  --out two_pulse_flexible_prop_2_clumped_100kb
+
+192953 MB RAM detected; reserving 96476 MB for main workspace.
+.ped scan complete (for binary autoconversion).
+Performing single-pass .bed write (786261 variants, 282 people).
+--file: two_pulse_flexible_prop_2_clumped_100kb-temporary.bed +
+two_pulse_flexible_prop_2_clumped_100kb-temporary.bim +
+two_pulse_flexible_prop_2_clumped_100kb-temporary.fam written.
+786261 variants loaded from .bim file.
+282 people (0 males, 0 females, 282 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to two_pulse_flexible_prop_2_clumped_100kb.nosex .
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 282 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.889586.
+786261 variants and 282 people pass filters and QC.
+Note: No phenotypes present.
+--clump: 36 clumps formed from 893 top variants.
+Results written to two_pulse_flexible_prop_2_clumped_100kb.clumped
+
+
+```
 
 
 
