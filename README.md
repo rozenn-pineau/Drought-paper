@@ -379,6 +379,16 @@ Run Time = 4.00 seconds
 Why did we lose one site here ?
 
 
+Getting the ancestry calls (in the form of genotypes) from the filtered vcf for more downstream analyses :
+```
+bgzip -f two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf
+
+tabix -f two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf.gz
+
+two_pulse_flexible_prop_2]$ bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf.gz > two_pulse_flexible_prop_2_values_ID_filtered_GT.txt
+```
+
+
 ## Checking : Does ancestry predict response to drought ?
 
 Our expectation is that var. rudis ancestry is better adapted to drought than var. tuberculatus. 
