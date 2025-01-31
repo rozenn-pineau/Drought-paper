@@ -398,8 +398,12 @@ Do we see this in our ancestry calls ? This is also simply a way to make sure th
 
 
 
+# Drought selection experiment trajectory analyses
 
+## upload scripts for trajectory analyses
 
+### Compare to ranomized distribution
+We calculate the allele frequency change at each site using the following script : [calculate_anc_calls_fq.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_anc_calls_fq.R).
 
 
 
