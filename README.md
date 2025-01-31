@@ -5,8 +5,11 @@ Suite of notes and scripts for the drought project.
 # Outline
 
 [Ancestry mapping using ancestry hmm](#Ancestry-mapping-using-ancestry-hmm)
+
 [GWAS on ancestry calls](#GWAS-on-ancestry-calls)
+
 [Drought selection experiment trajectory analyses](#Drought-selection-experiment-trajectory-analyses)
+
 
 
 # Ancestry mapping using ancestry hmm
