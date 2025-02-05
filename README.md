@@ -10,6 +10,7 @@ Suite of notes and scripts for the drought project.
 
 [Drought selection experiment trajectory analyses](#Drought-selection-experiment-trajectory-analyses)
 
+[Prepping herbarium dataset for trajectory analyses](#Prepping-herbarium-dataset-for-trajectory-analyses)
 
 
 # Ancestry mapping using ancestry hmm
@@ -408,12 +409,42 @@ Do we see this in our ancestry calls ? This is also simply a way to make sure th
 
 ## upload scripts for trajectory analyses
 
-### Compare to ranomized distribution
+### Compare to randomized distribution
 We calculate the allele frequency change at each site using the following script : [calculate_anc_calls_fq.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_anc_calls_fq.R).
 
 
 
+# Prepping herbarium dataset for trajectory analyses
 
+## Step (1) : filter herbarium vcf files for the 35 FDR drought adaptive sites
+(1) merge vcf for each chromosome together in one file
+
+```
+bcftools concat herb108_193_2_Scaffold_10_filteredsnps.vcf.gz herb108_193_2_Scaffold_16_filteredsnps.vcf.gz herb108_193_2_Scaffold_6_filteredsnps.vcf.gz herb108_193_2_Scaffold_11_filteredsnps.vcf.gz herb108_193_2_Scaffold_1_filteredsnps.vcf.gz herb108_193_2_Scaffold_7_filteredsnps.vcf.gz herb108_193_2_Scaffold_12_filteredsnps.vcf.gz herb108_193_2_Scaffold_2_filteredsnps.vcf.gz herb108_193_2_Scaffold_8_filteredsnps.vcf.gz herb108_193_2_Scaffold_13_filteredsnps.vcf.gz herb108_193_2_Scaffold_3_filteredsnps.vcf.gz herb108_193_2_Scaffold_9_filteredsnps.vcf.gz herb108_193_2_Scaffold_14_filteredsnps.vcf.gz herb108_193_2_Scaffold_4_filteredsnps.vcf.gz herb108_193_2_Scaffold_15_filteredsnps.vcf.gz herb108_193_2_Scaffold_5_filteredsnps.vcf.gz > merged.vcf
+
+```
+(2) make bed file
+
+```
+awk 'BEGIN {OFS="\t"} {print $1, $2-1, $2}' two_pulse_flexible_prop_2_values_ID_filtered_GT.txt > two_pulse_flexible_prop_2_values_ID_filtered_GT.bed
+```
+
+(3) extract lines from vcf based on bed file
+
+```
+cd /cds3/kreiner/herbarium/
+module load vcftools
+
+vcftools --vcf merged.vcf --positions /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/two_pulse_flexible_prop_2_values_ID_filtered_GT.bed --recode --stdout > /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/herb.vcf
+
+```
+!!! this is considering the fact that the positions that were given by ancestry_hmm output worked liked a vcf (base 0 versus base 1 for bed files).
+## Step (2) : prep panel for ancestry_hmm
+
+
+
+
+## Step (3) : run ancestry_hmm
 
 
 
