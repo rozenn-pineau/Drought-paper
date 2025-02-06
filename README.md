@@ -484,13 +484,13 @@ cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
 
 #make bed from vcf file
 vcf=herb_893FDR_non_clumped.vcf 
-bed=herb_893FDR_non_clumped.bed
+bed=herb_893FDR_non_clumped_plus1.bed
 
 awk 'BEGIN {OFS="\t"} 
-     !/^#/ {print $1, $2-1, $2}' "$vcf" > "$bed"
+     !/^#/ {print $1, $2, $2+1}' "$vcf" > "$bed" #position in vcf is shifted by one
 
 # Input files
-bed=herb_893FDR_non_clumped.bed
+bed=herb_893FDR_non_clumped_plus1.bed
 assoc=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt
 out=FDR_non_clumped_significant_sites_filtered.assoc.txt
 
@@ -515,6 +515,20 @@ echo "Filtering complete. Results saved in $out"
 
 ```
 
+The association file has 92 sites. However, they are not in the same order as the vcf file. Let's reorder them both. 
+
+
+### HERE ### 
+(I need to make sure both files are in the same order before running plink (and I might still get an error))
+
+
+
+
+
+```
+bcftools sort herb_893FDR_non_clumped.vcf > herb_893FDR_non_clumped_sorted.vcf
+
+```
 Run plink to clump sites.
 
 ```
