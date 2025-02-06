@@ -416,29 +416,57 @@ We calculate the allele frequency change at each site using the following script
 
 # Prepping herbarium dataset for trajectory analyses
 
-## Step (1) : filter herbarium vcf files for the 35 FDR drought adaptive sites
-(1) merge vcf for each chromosome together in one file
+## Step (1) : filter herbarium vcf files for drought adaptive sites
+
+(1) merge * herbarium * vcf for each chromosome together in one file
 
 ```
+cd /cds3/kreiner/herbarium
 bcftools concat herb108_193_2_Scaffold_10_filteredsnps.vcf.gz herb108_193_2_Scaffold_16_filteredsnps.vcf.gz herb108_193_2_Scaffold_6_filteredsnps.vcf.gz herb108_193_2_Scaffold_11_filteredsnps.vcf.gz herb108_193_2_Scaffold_1_filteredsnps.vcf.gz herb108_193_2_Scaffold_7_filteredsnps.vcf.gz herb108_193_2_Scaffold_12_filteredsnps.vcf.gz herb108_193_2_Scaffold_2_filteredsnps.vcf.gz herb108_193_2_Scaffold_8_filteredsnps.vcf.gz herb108_193_2_Scaffold_13_filteredsnps.vcf.gz herb108_193_2_Scaffold_3_filteredsnps.vcf.gz herb108_193_2_Scaffold_9_filteredsnps.vcf.gz herb108_193_2_Scaffold_14_filteredsnps.vcf.gz herb108_193_2_Scaffold_4_filteredsnps.vcf.gz herb108_193_2_Scaffold_15_filteredsnps.vcf.gz herb108_193_2_Scaffold_5_filteredsnps.vcf.gz > merged.vcf
 
 ```
-(2) make bed file
+
+(2) change to numeric chromosome names
+
+```
+#numeric chr names
+cat merged.vcf | \sed s/^Scaffold_//g  > merged_numericChr.vcf
+```
+
+(3) make bed file for the 35 FDR clumped significant drought sites AND the bed file from the inflated FDR significant sites from the GWAS, * before clumping * (893 sites)
 
 ```
 awk 'BEGIN {OFS="\t"} {print $1, $2-1, $2}' two_pulse_flexible_prop_2_values_ID_filtered_GT.txt > two_pulse_flexible_prop_2_values_ID_filtered_GT.bed
+
+#the other bed file was made from the R script and sent to the cluster
+#rozennpineau@midway3.rcc.uchicago.edu:/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/FDR_non_clumped_significant_sites.bed
 ```
 
-(3) extract lines from vcf based on bed file
+(4) extract lines from vcf based on bed file
 
 ```
 cd /cds3/kreiner/herbarium/
 module load vcftools
 
-vcftools --vcf merged.vcf --positions /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/two_pulse_flexible_prop_2_values_ID_filtered_GT.bed --recode --stdout > /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/herb.vcf
+#35 FDR clumped sites
+vcf=merged_numericChr.vcf
+bed=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/two_pulse_flexible_prop_2_values_ID_filtered_GT.bed
+
+vcftools --vcf $vcf --positions $bed --recode --stdout > /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/herb_35FDR_clumped.vcf
+
+#893 FDR non clumped sites
+bed=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/FDR_non_clumped_significant_sites.bed
+vcftools --vcf $vcf --positions $bed --recode --stdout > /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/herb_893FDR_non_clumped.vcf
 
 ```
-!!! this is considering the fact that the positions that were given by ancestry_hmm output worked liked a vcf (base 0 versus base 1 for bed files).
+
+I found 1 site in common between the 35 FDR clumped significant sites, and 92 with the 893 before clumping FDR sites.
+
+I will work with the set of 92 and clump using plink, as previously done for the drought vcf. 
+
+
+
+
 ## Step (2) : prep panel for ancestry_hmm
 
 
