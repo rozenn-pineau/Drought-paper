@@ -418,7 +418,7 @@ We calculate the allele frequency change at each site using the following script
 
 ## Step (1) : filter herbarium vcf files for drought adaptive sites
 
-(1) merge * herbarium * vcf for each chromosome together in one file
+<ins>(1) merge * herbarium * vcf for each chromosome together in one file </ins>
 
 ```
 cd /cds3/kreiner/herbarium
@@ -426,14 +426,14 @@ bcftools concat herb108_193_2_Scaffold_10_filteredsnps.vcf.gz herb108_193_2_Scaf
 
 ```
 
-(2) change to numeric chromosome names
+<ins>(2) change to numeric chromosome names</ins>
 
 ```
 #numeric chr names
 cat merged.vcf | \sed s/^Scaffold_//g  > merged_numericChr.vcf
 ```
 
-(3) make bed file for the 35 FDR clumped significant drought sites AND the bed file from the inflated FDR significant sites from the GWAS, * before clumping * (893 sites)
+<ins>(3) make bed file for the 35 FDR clumped significant drought sites AND the bed file from the inflated FDR significant sites from the GWAS, * before clumping * (893 sites)</ins>
 
 ```
 awk 'BEGIN {OFS="\t"} {print $1, $2-1, $2}' two_pulse_flexible_prop_2_values_ID_filtered_GT.txt > two_pulse_flexible_prop_2_values_ID_filtered_GT.bed
@@ -442,7 +442,7 @@ awk 'BEGIN {OFS="\t"} {print $1, $2-1, $2}' two_pulse_flexible_prop_2_values_ID_
 #rozennpineau@midway3.rcc.uchicago.edu:/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/FDR_non_clumped_significant_sites.bed
 ```
 
-(4) extract lines from vcf based on bed file
+<ins>(4) extract lines from vcf based on bed file</ins>
 
 ```
 cd /cds3/kreiner/herbarium/
@@ -462,10 +462,71 @@ vcftools --vcf $vcf --positions $bed --recode --stdout > /scratch/midway3/rozenn
 
 I found 1 site in common between the 35 FDR clumped significant sites, and 92 with the 893 before clumping FDR sites.
 
-I will work with the set of 92 and clump using plink, as previously done for the drought vcf. 
+I will work with the set of 92 and clump based on LD using plink, as previously done for the drought vcf. 
+
+<ins>(5) clump</ins>
+
+Create plink family files from a vcf :
+
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
+#make plink family files and create ID based on position information
+module load plink
+plink --vcf herb_893FDR_non_clumped.vcf --out herb_893FDR_non_clumped --allow-extra-chr --recode --double-id 
+```
+
+The association file has more sites than the filtered vcf, filter the association file for the specific sites only:
+
+```
+#!/bin/bash
+
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
+
+#make bed from vcf file
+vcf=herb_893FDR_non_clumped.vcf 
+bed=herb_893FDR_non_clumped.bed
+
+awk 'BEGIN {OFS="\t"} 
+     !/^#/ {print $1, $2-1, $2}' "$vcf" > "$bed"
+
+# Input files
+bed=herb_893FDR_non_clumped.bed
+assoc=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt
+out=FDR_non_clumped_significant_sites_filtered.assoc.txt
+
+# Define column positions for chrom and pos in the TXT file (1-based index)
+CHROM_COL=13  
+POS_COL=14    
 
 
+# Convert column positions to AWK's 1-based indexing
+awk -v chrom_col="$CHROM_COL" -v pos_col="$POS_COL" '
+    NR==FNR {sites[$1][$3]; next}  
+    { 
+        chrom = $chrom_col; 
+        pos = $pos_col;
+        if (chrom in sites) 
+            for (s in sites[chrom]) 
+                if (pos >= s && pos <= s) 
+                    print $0;
+    }' "$bed" "$assoc" > "$out"
 
+echo "Filtering complete. Results saved in $out"
+
+```
+
+Run plink to clump sites.
+
+```
+assoc=FDR_non_clumped_significant_sites_filtered.assoc.txt
+plink --file herb_893FDR_non_clumped --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out herb_893FDR_clumped_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
+
+#error duplicate ID-why
+#bfile is 0.9 cutoff for ancestry calls
+#association file from gemma gwas with --miss 0.2
+
+
+```
 
 ## Step (2) : prep panel for ancestry_hmm
 
