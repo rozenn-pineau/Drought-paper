@@ -466,14 +466,6 @@ I will work with the set of 92 and clump based on LD using plink, as previously 
 
 <ins>(5) clump</ins>
 
-Create plink family files from a vcf :
-
-```
-cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
-#make plink family files and create ID based on position information
-module load plink
-plink --vcf herb_893FDR_non_clumped.vcf --out herb_893FDR_non_clumped --allow-extra-chr --recode --double-id 
-```
 
 The association file has more sites than the filtered vcf, filter the association file for the specific sites only:
 
@@ -521,19 +513,53 @@ The association file has 92 sites. However, they are not in the same order as th
 ### HERE ### 
 (I need to make sure both files are in the same order before running plink (and I might still get an error))
 
+```
+#Sort the vcf file :
+grep "^#" herb_893FDR_non_clumped.vcf > herb_893FDR_non_clumped_sorted.vcf
+grep -v "^#" herb_893FDR_non_clumped.vcf | sort -k1,1V -k2,2g >> herb_893FDR_non_clumped_sorted.vcf
 
+#check
+grep -v "#" herb_893FDR_non_clumped_sorted.vcf | awk '{print $1,$2}' #looks good
 
+#positions in vcf are off by 1, fix :
+
+grep "^#" herb_893FDR_non_clumped_sorted.vcf > herb_893FDR_non_clumped_sorted_POSfixed.vcf
+
+grep -v "^#" herb_893FDR_non_clumped_sorted.vcf | awk -F=\t '$2 = $2+1 {print $0}' >> herb_893FDR_non_clumped_sorted_POSfixed.vcf
+
+#check
+grep -v "#" herb_893FDR_non_clumped_sorted_POSfixed.vcf | awk '{print $1,$2}' #looks good
+
+#add the ID field in the vcf
+awk 'NR <= 5 {print; next} {OFS="\t"; $3 = $1 ":" $2; print}'
+
+#sort the association file
+sort -k13,13V -k14,14g FDR_non_clumped_significant_sites_filtered.assoc.txt >> FDR_non_clumped_significant_sites_filtered_sorted.assoc.txt
+#adding the header line for the association file :
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2
+head -n 1 ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt > /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/header_line
+cat header_line FDR_non_clumped_significant_sites_filtered_sorted.assoc.txt > FDR_non_clumped_significant_sites_filtered_sorted_header.assoc.txt
 
 
 ```
-bcftools sort herb_893FDR_non_clumped.vcf > herb_893FDR_non_clumped_sorted.vcf
+
+Create plink family files from the vcf :
 
 ```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
+#make plink family files and create ID based on position information
+module load plink
+plink --vcf herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed.vcf --out herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed --allow-extra-chr --recode --double-id 
+```
+
+
 Run plink to clump sites.
 
 ```
-assoc=FDR_non_clumped_significant_sites_filtered.assoc.txt
-plink --file herb_893FDR_non_clumped --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out herb_893FDR_clumped_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
+
+assoc=FDR_non_clumped_significant_sites_filtered_sorted_header.assoc.txt
+plink --file herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
+
 
 #error duplicate ID-why
 #bfile is 0.9 cutoff for ancestry calls
