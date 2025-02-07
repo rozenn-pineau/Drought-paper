@@ -524,14 +524,13 @@ grep -v "#" herb_893FDR_non_clumped_sorted.vcf | awk '{print $1,$2}' #looks good
 #positions in vcf are off by 1, fix :
 
 grep "^#" herb_893FDR_non_clumped_sorted.vcf > herb_893FDR_non_clumped_sorted_POSfixed.vcf
-
-grep -v "^#" herb_893FDR_non_clumped_sorted.vcf | awk -F=\t '$2 = $2+1 {print $0}' >> herb_893FDR_non_clumped_sorted_POSfixed.vcf
+grep -v "^#" herb_893FDR_non_clumped_sorted.vcf | awk  '{OFS="\t"; $2 = $2+1; print}' >> herb_893FDR_non_clumped_sorted_POSfixed.vcf
 
 #check
 grep -v "#" herb_893FDR_non_clumped_sorted_POSfixed.vcf | awk '{print $1,$2}' #looks good
 
 #add the ID field in the vcf
-awk 'NR <= 5 {print; next} {OFS="\t"; $3 = $1 ":" $2; print}'
+HERE
 
 #sort the association file
 sort -k13,13V -k14,14g FDR_non_clumped_significant_sites_filtered.assoc.txt >> FDR_non_clumped_significant_sites_filtered_sorted.assoc.txt
@@ -549,23 +548,29 @@ Create plink family files from the vcf :
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
 #make plink family files and create ID based on position information
 module load plink
-plink --vcf herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed.vcf --out herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed --allow-extra-chr --recode --double-id 
+vcf=herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed.vcf
+
+plink --vcf $vcf --out herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed --allow-extra-chr --recode --double-id 
 ```
 
 
 Run plink to clump sites.
 
+
+
 ```
 
 assoc=FDR_non_clumped_significant_sites_filtered_sorted_header.assoc.txt
-plink --file herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
+plink --file herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
 
-
-#error duplicate ID-why
-#bfile is 0.9 cutoff for ancestry calls
-#association file from gemma gwas with --miss 0.2
-
-
+#worked!
+Calculating allele frequencies... done.
+Total genotyping rate is 0.926832.
+92 variants and 108 people pass filters and QC.
+Note: No phenotypes present.
+--clump: 86 clumps formed from 92 top variants.
+Results written to
+herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb.clumped
 ```
 
 ## Step (2) : prep panel for ancestry_hmm
