@@ -684,11 +684,29 @@ bcftools query -l herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed.vc
 awk '{OFS="\t" ; print $1, 2}' sample_file.tmp > sample_file.txt
 ```
 
-
-HERE
 ## Step (3) : run ancestry_hmm
 
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/3_run/two_pulse
 
+#!/bin/bash
+#SBATCH --job-name=anc_hmm
+#SBATCH --output=slurm.out
+#SBATCH --error=slurm.err
+#SBATCH --time=36:00:00
+#SBATCH --partition=caslake
+#SBATCH --account=pi-kreiner
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem-per-cpu=10GB
+
+module load python/anaconda-2022.05
+source /software/python-anaconda-2022.05-el8-x86_64/etc/profile.d/conda.sh
+conda activate /project/kreiner
+
+ancestry_hmm -i herb86_clumped_input_file.txt -s sample_file.txt -a 2 0.33 0.67 -p 0 100000 0.33 -p 1 -9999 0.43 -p 1 -100 0.24 --tmax 10000
+```
+## Step (4) : process output from ancestry_hmm
 
 
 
