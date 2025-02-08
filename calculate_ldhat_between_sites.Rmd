@@ -1,0 +1,83 @@
+title: "LDhat"
+output: html_document
+date: "2024-10-21"
+---
+
+Mapping the results from LDhat (rhomap) estimating the recombination rate across the genome. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(extrafont)
+library(dplyr)
+library(ggplot2)
+rm(list= ls())
+
+#upload data
+rhomap <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep/rhomap.txt", sep = "\t", header = F) 
+colnames(rhomap) <- c("chr", "pos/1000", "rho")
+rhomap$pos <- rhomap$`pos/1000`*1000
+
+#CHOOSE FILE HERE
+#upload positions from ancestry_hmm - drought file
+pos_info <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep/drought_q75_common.bed", sep = "\t", header = F )
+
+#upload positions from ancestry_hmm - herbarium file
+pos_info <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep_herbarium/herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_clean_100kb.bed", sep = "\t", header = F )
+
+#100kb windows, group by chromosome and window, calculate mean recombination rate
+window_size <- 100000
+rhomap_summary <- rhomap %>% mutate(win=floor(pos/window_size)) %>% group_by(chr,win) %>% summarise(mean_rho=mean(rho)) 
+rhomap_summary <- data.frame(rhomap_summary)
+
+
+```
+
+
+
+```{r make_rho_map_file, include=FALSE}
+anc_filtered_rho <- c()
+anc_filtered_pos <- c()
+anc_filtered_chr <- c()
+
+for (i in 1:16){
+  
+  #calculate cumsum and monotonic spline per chromosome
+  cur <- rhomap_summary[rhomap_summary$chr == i, ] #choose one chr
+  cur$cumsum <- cumsum(cur$mean_rho)
+  cur$pos <- cur$win*window_size
+  MonotonicSplineFunction <- splinefun(x = cur$pos, y = cur$cumsum, method = "hyman")
+
+  #get the positions for ld estimation based on spline
+  pos <- pos_info[pos_info[,1] == i, 2]
+  #if no chromosome, pass
+  if (length(pos)>0){
+      #make sure no position in the ancestor vcf is lower than the rhomap positions
+      rm <- which( cur$pos[1] > pos ) #remove those positions
+      if (length(rm) > 0) {new_pos <- pos[-rm]} else {new_pos <- pos}
+      #make sure no position in the ancestor vcf is higher than the rhomap positions
+      rm <- which( max(cur$pos) < pos ) #remove those positions
+      if (length(rm) > 0) {new_pos <- new_pos[-rm]}
+      monotonicFit <- MonotonicSplineFunction(new_pos) #this is the ld for each position, increasing
+    
+      #what is the ld BETWEEN positions
+      l <- length(monotonicFit)
+      if( length(which(c(monotonicFit[2:l] - monotonicFit[1:(l-1)]) < 0) >=1 ) ) {break} #check for troubles
+      
+      #keep track 
+      anc_filtered_rho <- c(anc_filtered_rho , c(0, c(monotonicFit[2:l] - monotonicFit[1:(l-1)])) )# start at zero
+      anc_filtered_pos <- c(anc_filtered_pos, new_pos)
+      anc_filtered_chr <- c(anc_filtered_chr, rep(i, length(new_pos)) )
+  }
+}
+
+#turn to dataframe + keep track of the positions that were used and create a new bed that will be used to update the vcfs
+rho_ancestry <- data.frame(chr = anc_filtered_chr, 
+                           pos = anc_filtered_pos + 1,
+                           pos_plus1 = anc_filtered_pos + 2,
+                           rho = anc_filtered_rho)
+dim(rho_ancestry)
+
+summary(rho_ancestry)
+write.table(rho_ancestry, "/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep_herbarium/herb_86clumped.ld", sep = "\t", col.names = T, row.names = F)
+
+```
