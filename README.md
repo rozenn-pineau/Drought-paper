@@ -623,6 +623,21 @@ I use the script [calculate_ldhat_between_sites.Rmd](https://github.com/rozenn-p
 
 <ins>(5) Filter ancestry panel for the herbarium sites </ins>
 
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file
+
+bed=herb_86clump_for_ancestry.bed
+
+vcf=/scratch/midway3/rozennpineau/drought/ancestry_hmm/prep_ancestry/vcfs/var_rudis_q75.vcf
+vcftools --vcf $vcf --positions $bed --recode --stdout > var_rud_86clump.vcf
+
+vcf=/scratch/midway3/rozennpineau/drought/ancestry_hmm/prep_ancestry/vcfs/var_tub_q75.vcf
+vcftools --vcf $vcf --positions $bed --recode --stdout > var_tub_86clump.vcf
+```
+
+<ins>(6) Vcf to genotype counts for ancestry panel </ins>
+
+
 
 HERE
 ## Step (3) : run ancestry_hmm
