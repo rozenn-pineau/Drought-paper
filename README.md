@@ -637,7 +637,14 @@ vcftools --vcf $vcf --positions $bed --recode --stdout > var_tub_86clump.vcf
 
 <ins>(6) Vcf to genotype counts for ancestry panel </ins>
 
+I use the script [genotype_to_allele_counts.awk](https://github.com/rozenn-pineau/Drought-paper/blob/main/genotype_to_allele_counts.awk) to calculate the number of genotypes in the ancestry panel :
+```
+/scratch/midway3/rozennpineau/drought/scripts/genotype_to_allele_counts.awk var_tub_86clump.vcf > allele_counts_86clump_var_tub.txt
 
+/scratch/midway3/rozennpineau/drought/scripts/genotype_to_allele_counts.awk var_rud_86clump.vcf > allele_counts_86clump_var_rud.txt
+```
+
+<ins>(7) Assemble the input_file  </ins>
 
 HERE
 ## Step (3) : run ancestry_hmm
