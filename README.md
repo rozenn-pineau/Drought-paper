@@ -673,6 +673,18 @@ tail -n 86  herb_86clumped_ld.txt | awk '{OFS="\t"; print $4}' > herb86_clumped.
 #assemble chrom, pos, var tub allele counts, var rudis allele counts, rho, then sample read counts
 paste allele_counts_86clump_var_tub.txt var_rud.allele_count herb86_clumped.ld herb_86clumped_allele_count.txt > herb86_clumped_input_file.txt
 ```
+
+
+<ins>(7) Prep the sample file </ins>
+
+The sample file is simply : samplename ploidy, in the same order as in the allele counts files.
+
+```
+bcftools query -l herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed.vcf > sample_file.tmp
+awk '{OFS="\t" ; print $1, 2}' sample_file.tmp > sample_file.txt
+```
+
+
 HERE
 ## Step (3) : run ancestry_hmm
 
