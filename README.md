@@ -588,7 +588,7 @@ awk 'NR <= 1 {next} {OFS="\t"; print $1,$4-1,$4}' herb_893FDR_non_clumped_sorted
 head -n -2  herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb.bed > herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_clean_100kb.bed
 ```
 
-<ins>(2) Filter the herbairum vcf based on the bed file </ins>
+<ins>(2) Filter the herbarium vcf based on the bed file </ins>
 
 ```
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
@@ -599,11 +599,18 @@ module load vcftools
 
 vcf=merged_numericChr.vcf
 
-module load vcftools
-vcftools --vcf $vcf --positions $bed --recode --stdout > herb_86clumped_minus1.vcf
-
-
+vcftools --vcf $vcf --positions $bed --recode --stdout > herb_86clumped.vcf
 ```
+
+<ins>(3) Get the read counts </ins>
+
+I ran the [vcf_to_read_counts.awk](https://github.com/rozenn-pineau/Drought-paper/blob/main/vcf_to_read_counts.awk) script to convert the genotype information to read counts (will be the right side of the ancestry_hmm input file). 
+
+The file is : /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file/herb_86clumped_allele_count.txt
+
+<ins>(4) Calculate LD between those 86 sites </ins>
+
+
 
 HERE
 ## Step (3) : run ancestry_hmm
