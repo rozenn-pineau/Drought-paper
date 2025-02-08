@@ -1,3 +1,4 @@
+---
 title: "LDhat"
 output: html_document
 date: "2024-10-21"
@@ -23,6 +24,8 @@ pos_info <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpin
 
 #upload positions from ancestry_hmm - herbarium file
 pos_info <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep_herbarium/herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_clean_100kb.bed", sep = "\t", header = F )
+#sort
+pos_info <- pos_info[order(pos_info$V1, pos_info$V2, decreasing = F),]
 
 #100kb windows, group by chromosome and window, calculate mean recombination rate
 window_size <- 100000
@@ -50,7 +53,13 @@ for (i in 1:16){
   #get the positions for ld estimation based on spline
   pos <- pos_info[pos_info[,1] == i, 2]
   #if no chromosome, pass
-  if (length(pos)>0){
+  if (length(pos)==0){print("no calculation needed for this chromosome")} #go to next chromosome
+  #if one position only per chromosome, just add 0
+  else if (length(pos)==1){
+    anc_filtered_rho <- c(anc_filtered_rho , 0)
+    anc_filtered_pos <- c(anc_filtered_pos, pos)
+    anc_filtered_chr <- c(anc_filtered_chr, i)}
+  else if (length(pos)>1){
       #make sure no position in the ancestor vcf is lower than the rhomap positions
       rm <- which( cur$pos[1] > pos ) #remove those positions
       if (length(rm) > 0) {new_pos <- pos[-rm]} else {new_pos <- pos}
@@ -61,7 +70,7 @@ for (i in 1:16){
     
       #what is the ld BETWEEN positions
       l <- length(monotonicFit)
-      if( length(which(c(monotonicFit[2:l] - monotonicFit[1:(l-1)]) < 0) >=1 ) ) {break} #check for troubles
+      if( length(which(c(monotonicFit[2:l] - monotonicFit[1:(l-1)]) < 0) >=1 ) ) {print("Problem") ; break} #check for troubles
       
       #keep track 
       anc_filtered_rho <- c(anc_filtered_rho , c(0, c(monotonicFit[2:l] - monotonicFit[1:(l-1)])) )# start at zero
@@ -72,8 +81,8 @@ for (i in 1:16){
 
 #turn to dataframe + keep track of the positions that were used and create a new bed that will be used to update the vcfs
 rho_ancestry <- data.frame(chr = anc_filtered_chr, 
-                           pos = anc_filtered_pos + 1,
-                           pos_plus1 = anc_filtered_pos + 2,
+                           pos = anc_filtered_pos,
+                           pos_plus1 = anc_filtered_pos + 1,
                            rho = anc_filtered_rho)
 dim(rho_ancestry)
 
@@ -81,3 +90,6 @@ summary(rho_ancestry)
 write.table(rho_ancestry, "/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep_herbarium/herb_86clumped.ld", sep = "\t", col.names = T, row.names = F)
 
 ```
+
+
+
