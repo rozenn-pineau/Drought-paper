@@ -646,6 +646,33 @@ I use the script [genotype_to_allele_counts.awk](https://github.com/rozenn-pinea
 
 <ins>(7) Assemble the input_file  </ins>
 
+ancestry panel 0 :
+
+/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file/allele_counts_86clump_var_tub.txt
+
+ancestry panel 1  :
+
+/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file/allele_counts_86clump_var_rud.txt
+
+LD file :
+
+/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file/herb_86clumped_ld.txt
+
+sample counts :
+
+/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file/herb_86clumped_allele_count.txt
+
+
+```
+#var rudis allele counts 
+awk '{OFS="\t"; print $3,$4}' allele_counts_86clump_var_rud.txt > var_rud.allele_count
+
+#rho column
+tail -n 86  herb_86clumped_ld.txt | awk '{OFS="\t"; print $4}' > herb86_clumped.ld
+
+#assemble chrom, pos, var tub allele counts, var rudis allele counts, rho, then sample read counts
+paste allele_counts_86clump_var_tub.txt var_rud.allele_count herb86_clumped.ld herb_86clumped_allele_count.txt > herb86_clumped_input_file.txt
+```
 HERE
 ## Step (3) : run ancestry_hmm
 
