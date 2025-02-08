@@ -604,12 +604,24 @@ vcftools --vcf $vcf --positions $bed --recode --stdout > herb_86clumped.vcf
 
 <ins>(3) Get the read counts </ins>
 
+Make sure the vcf file is sorted :
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file
+herb_86clumped.vcf
+grep "^#" herb_86clumped.vcf > herb_86clumped_sorted.vcf
+grep -v "^#" herb_86clumped.vcf | sort -k1,1V -k2,2g >> herb_86clumped_sorted.vcf
+
+```
 I ran the [vcf_to_read_counts.awk](https://github.com/rozenn-pineau/Drought-paper/blob/main/vcf_to_read_counts.awk) script to convert the genotype information to read counts (will be the right side of the ancestry_hmm input file). 
 
 The file is : /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_prep_file/herb_86clumped_allele_count.txt
 
 <ins>(4) Calculate LD between those 86 sites </ins>
 
+I use the script [calculate_ldhat_between_sites.Rmd](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ldhat_between_sites.Rmd) to calculate LD between each site in the bed file. 
+(It is better to calculate LD before getting the read counts ready (step 3) because some sites that are outside of our LD map, such that they are removed from the analysis. In this case, everything was within the boundaries because the filtering had previously been done with the drought files).
+
+<ins>(5) Filter ancestry panel for the herbarium sites </ins>
 
 
 HERE
