@@ -510,9 +510,6 @@ echo "Filtering complete. Results saved in $out"
 The association file has 92 sites. However, they are not in the same order as the vcf file. Let's reorder them both. 
 
 
-### HERE ### 
-(I need to make sure both files are in the same order before running plink (and I might still get an error))
-
 ```
 #Sort the vcf file :
 grep "^#" herb_893FDR_non_clumped.vcf > herb_893FDR_non_clumped_sorted.vcf
@@ -530,7 +527,11 @@ grep -v "^#" herb_893FDR_non_clumped_sorted.vcf | awk  '{OFS="\t"; $2 = $2+1; pr
 grep -v "#" herb_893FDR_non_clumped_sorted_POSfixed.vcf | awk '{print $1,$2}' #looks good
 
 #add the ID field in the vcf
-HERE
+grep "^#" herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed.vcf > header
+grep -v "^#" herb_893FDR_non_clumped_sorted_POSfixed.vcf > core
+awk 'NR <= 0 {print; next} {OFS="\t"; $3 = $1 ":" $2; print}' core > core_ID
+
+cat header core_ID > herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed.vcf
 
 #sort the association file
 sort -k13,13V -k14,14g FDR_non_clumped_significant_sites_filtered.assoc.txt >> FDR_non_clumped_significant_sites_filtered_sorted.assoc.txt
@@ -573,11 +574,38 @@ Results written to
 herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb.clumped
 ```
 
-## Step (2) : prep panel for ancestry_hmm
+## Step (2) : prep the input_file for ancestry_hmm
+
+<ins>(1) Make bed file from clumped sites (86 sites) </ins>
+
+```
+#make bed file from the 86 clumped sites
+
+awk 'NR <= 1 {next} {OFS="\t"; print $1,$4-1,$4}' herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb.clumped > herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb.bed
+
+#remove the two last lines (crap)
+
+head -n -2  herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb.bed > herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_clean_100kb.bed
+```
+
+<ins>(2) Filter the herbairum vcf based on the bed file </ins>
+
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium
+bed=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_clean_100kb.bed
+
+cd /cds3/kreiner/herbarium/
+module load vcftools
+
+vcf=merged_numericChr.vcf
+
+module load vcftools
+vcftools --vcf $vcf --positions $bed --recode --stdout > herb_86clumped_minus1.vcf
 
 
+```
 
-
+HERE
 ## Step (3) : run ancestry_hmm
 
 
