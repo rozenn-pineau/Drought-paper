@@ -61,11 +61,37 @@ Rscript to choose Fst threshold : [fst_on_ancestry.Rmd](https://github.com/rozen
 ### Step (3) : keep the variants common to the ancestry variant file and the drought variant file
 The ancestry was filtered for the high Fst sites. This filtered file was used to keep the intersection between the ancestry variant file and the drought variant file (bcftools isec).
 At this step, we have two variant files with the same variants for the two populations.
+Now, we need to generate the rho information between each site.
+
+
+### Step (4) : calculate rho between each site
+Based on an estimation of ld for (nearly) the whole genome, we calculated, chromosome per chromosome, the linkage value between two consecutive sites. To do this, we fit a monotonic spline on the cumulative distribution of the mean recombination rates. 
+
+Important note: we had to exclude the sites that were outside of the region defined by the recombination map (the monotonic spline does not extrapolate outside of boundaries). Then, we kept track of which sites to filter out of the variant files. 
+
+Rscript to calculate rho between sites : [calculate_ldhat_between_sites.Rmd](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ldhat_between_sites.Rmd).
 
 
 
+### Step (5) : extract allele counts from the ancestry variant file
 
+[genotype_to_allele_counts.awk](https://github.com/rozenn-pineau/Drought-paper/blob/main/genotype_to_allele_counts.awk)
 
+exanple output :
+22 22 for 22 individuals, all heterozygotes
+00 44 for 22 individuals, all homs alternative
+
+### Step (6) : get genotypes for drought panel
+
+2,0 for homs reference
+1,1 for hets
+0,2 for homs alternative
+
+[vcf_to_read_counts.awk](https://github.com/rozenn-pineau/Drought-paper/blob/main/vcf_to_read_counts.awk)
+
+### Step (7) : put the file together
+
+Paste columns together to make the full file, following instructions on ancestry_hmm github page. 
 
 
 
