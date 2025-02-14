@@ -21,7 +21,7 @@ Suite of notes and scripts for the drought project.
 [Ancestry_hmm](https://github.com/russcd/Ancestry_HMM) : tool to infer ancestry at input positions in the genome (Corbett-Detig, R. and Nielsen, R., 2017.)
 
 
-## Step (1) : define var rudis versus and var tuberculatus pure ancestry individuals
+### Step (1) : define var rudis versus and var tuberculatus pure ancestry individuals
 To define the "ancestry panel" and not lose any of the drought data, we used an additional dataset, variants from common garden experiments used in Kreiner et al, 2022 that were realigned on a newer version of the reference genome. We ran structure with k=2, and kept individuals with pure ancestry with a threshold of 0.00001. We identified 44 pure var. rudis and 21 pure var. tuberculatus samples.
 
 ```
