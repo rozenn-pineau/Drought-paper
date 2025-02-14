@@ -1,0 +1,78 @@
+---
+title: "Fst on Ancestry"
+output: html_document
+date: "2024-10-29"
+---
+
+Which sites should we keep to run admixture on?
+I calculated Fst on the ancestry file between samples making a pure var rudis versus samples making a pure var tuberculatus population.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(extrafont)
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(adegenet)
+
+rm(list= ls())
+
+#upload data
+fst <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/ancestry_maf.weir.fst", sep = "\t", header = T) #fst
+#remove nas from file
+fst_filt <- fst[!is.na(fst$WEIR_AND_COCKERHAM_FST),]
+
+rudis <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/var_rudis_samp.txt", sep = "\t", header = F) #var rudis samples
+tub <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/var_tub_samp.txt", sep = "\t", header = F) #var tub samples
+
+```
+
+Plot the distribution of fst values.
+Fst - measure of population differentiation, ranges from 0 to 1 with 0 being no differentiation and 1 being complete differentation. 
+We are aiming for values close to 1, to get snps that are as differentiated between populations as possible. 
+
+```{r fst_plot}
+par(family = "Times New Roman")
+plot(sort(fst_filt$WEIR_AND_COCKERHAM_FST), pch = 16, xlab = "site", ylab = "Fst", main = "Population differentiation per site")
+
+t_mean <- 2*mean(fst_filt$WEIR_AND_COCKERHAM_FST) #0.296
+abline(h = t_mean, col = "red")
+```
+How many sites do we keep as we increase the Fst threshold?
+
+```{r loop_through_thresholds}
+tvec <- quantile(fst_filt$WEIR_AND_COCKERHAM_FST, seq(0.5,1, by = 0.05))
+tot <- length(fst_filt$WEIR_AND_COCKERHAM_FST)
+num_sites <- matrix(NA, length(tvec))
+
+for (t in 1:length(tvec)) {
+  
+  thresh <- tvec[t]
+  num_sites[t] <- length(which(fst_filt$WEIR_AND_COCKERHAM_FST > thresh))
+  
+  
+  
+}
+
+par(family = "Times New Roman")
+plot(tvec, num_sites, pch = 16, xlab = "Fst threshold", ylab = "Number of sites")
+abline(v = t_mean, col = "red")
+tvec[which(num_sites == 2089610)]
+
+#sites to keep - 2 times the mean
+keep <- fst_filt[which(fst_filt$WEIR_AND_COCKERHAM_FST > t_mean),] #1478756 x 3
+write.table(keep, "/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/fst_filtered_ancestry_sites.txt", sep = "\t", col.names = T, row.names = F)
+
+#90th quantile
+tvec
+keep <- fst_filt[which(fst_filt$WEIR_AND_COCKERHAM_FST > tvec[9]),] #834280 x  3
+write.table(keep, "/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/fst_filtered_ancestry_sites_q90.txt", sep = "\t", col.names = T, row.names = F)
+
+#75# quantile
+keep <- fst_filt[which(fst_filt$WEIR_AND_COCKERHAM_FST > tvec[6]),] #834280 x  3
+write.table(keep, "/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/fst_filtered_ancestry_sites_q75.txt", sep = "\t", col.names = T, row.names = F)
+
+```
+
+
