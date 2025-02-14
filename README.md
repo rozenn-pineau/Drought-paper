@@ -4,7 +4,7 @@ Suite of notes and scripts for the drought project.
 
 # Outline
 
-[Drought dataset : ancestry mapping using ancestry hmm](#Drought-dataset-:-ancestry-mapping-using-ancestry-hmm)
+[Drought dataset : ancestry mapping using ancestry hmm](#Drought-dataset---ancestry-mapping-using-ancestry-hmm)
 
 [Processing results from ancestry_hmm output](#Processing-results-from-ancestry_hmm-output)
 
@@ -12,13 +12,15 @@ Suite of notes and scripts for the drought project.
 
 [Drought selection experiment trajectory analyses](#Drought-selection-experiment-trajectory-analyses)
 
-[Herbarium dataset: ancestry mapping using ancestry hmm](#Herbarium-dataset-:-ancestry-mapping-using-ancestry-hmm)
-    [Calling ancestry on drought-informative sites only](#Calling-ancestry-on-drought-informative-sites-only)
-    [Calling ancestry on more sites](#Calling-ancestry-on-more-sites)
+[Herbarium dataset: ancestry mapping using ancestry hmm](#Herbarium-dataset---ancestry-mapping-using-ancestry-hmm)
+
+        [Calling ancestry on drought-informative sites only](#Calling-ancestry-on-drought-informative-sites-only)
+    
+        [Calling ancestry on more sites](#Calling-ancestry-on-more-sites)
 
 
 
-# Drought dataset : ancestry mapping using ancestry hmm
+# Drought dataset - ancestry mapping using ancestry hmm
 
 
 [Ancestry_hmm](https://github.com/russcd/Ancestry_HMM) : tool to infer ancestry at input positions in the genome (Corbett-Detig, R. and Nielsen, R., 2017.)
@@ -501,7 +503,7 @@ We calculate the allele frequency change at each site using the following script
 
 
 
-# Herbarium dataset: ancestry mapping using ancestry hmm
+# Herbarium dataset - ancestry mapping using ancestry hmm
 
 ## Calling ancestry on drought-informative sites only
 
