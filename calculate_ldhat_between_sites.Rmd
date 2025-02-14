@@ -23,7 +23,7 @@ rhomap$pos <- rhomap$`pos/1000`*1000
 pos_info <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep/drought_q75_common.bed", sep = "\t", header = F )
 
 #upload positions from ancestry_hmm - herbarium file
-pos_info <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep_herbarium/herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_clean_100kb.bed", sep = "\t", header = F )
+pos_info <- read.table("/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/5.herbarium/data/ancestry_common_976662.bed", sep = "\t", header = F )
 #sort
 pos_info <- pos_info[order(pos_info$V1, pos_info$V2, decreasing = F),]
 
@@ -87,7 +87,7 @@ rho_ancestry <- data.frame(chr = anc_filtered_chr,
 dim(rho_ancestry)
 
 summary(rho_ancestry)
-write.table(rho_ancestry, "/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/8.ancestry_hmm/0.prep_herbarium/herb_86clumped.ld", sep = "\t", col.names = T, row.names = F)
+write.table(rho_ancestry, "/Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/data/5.herbarium/data/ancestry_herb_common_974134.ld", sep = "\t", col.names = T, row.names = F)
 
 ```
 
