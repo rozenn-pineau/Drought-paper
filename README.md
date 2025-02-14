@@ -4,7 +4,7 @@ Suite of notes and scripts for the drought project.
 
 # Outline
 
-[Ancestry mapping using ancestry hmm](#Ancestry-mapping-using-ancestry-hmm)
+[Drought dataset : ancestry mapping using ancestry hmm](#Drought-dataset-:-ancestry-mapping-using-ancestry-hmm)
 
 [Processing results from ancestry_hmm output](#Processing-results-from-ancestry_hmm-output)
 
@@ -12,10 +12,13 @@ Suite of notes and scripts for the drought project.
 
 [Drought selection experiment trajectory analyses](#Drought-selection-experiment-trajectory-analyses)
 
-[Prepping herbarium dataset for trajectory analyses](#Prepping-herbarium-dataset-for-trajectory-analyses)
+[Herbarium dataset: ancestry mapping using ancestry hmm](#Herbarium-dataset-:-ancestry-mapping-using-ancestry-hmm)
+    [Calling ancestry on drought-informative sites only](#Calling-ancestry-on-drought-informative-sites-only)
+    [Calling ancestry on more sites](#Calling-ancestry-on-more-sites)
 
 
-# Ancestry mapping using ancestry hmm
+
+# Drought dataset : ancestry mapping using ancestry hmm
 
 
 [Ancestry_hmm](https://github.com/russcd/Ancestry_HMM) : tool to infer ancestry at input positions in the genome (Corbett-Detig, R. and Nielsen, R., 2017.)
@@ -498,9 +501,12 @@ We calculate the allele frequency change at each site using the following script
 
 
 
-# Prepping herbarium dataset for trajectory analyses
+# Herbarium dataset: ancestry mapping using ancestry hmm
 
-## Step (1) : filter herbarium vcf files for drought adaptive sites
+## Calling ancestry on drought-informative sites only
+
+
+### Step (1) : filter herbarium vcf files for drought adaptive sites
 
 <ins>(1) merge * herbarium * vcf for each chromosome together in one file </ins>
 
@@ -658,7 +664,7 @@ Results written to
 herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed_100kb.clumped
 ```
 
-## Step (2) : prep the input_file for ancestry_hmm
+### Step (2) : prep the input_file for ancestry_hmm
 
 <ins>(1) Make bed file from clumped sites (86 sites) </ins>
 
@@ -768,7 +774,7 @@ bcftools query -l herb_893FDR_non_clumped_sorted_POSfixed_FORMATfixed_IDfixed.vc
 awk '{OFS="\t" ; print $1, 2}' sample_file.tmp > sample_file.txt
 ```
 
-## Step (3) : run ancestry_hmm
+### Step (3) : run ancestry_hmm
 
 ```
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/3_run/two_pulse
@@ -790,9 +796,10 @@ conda activate /project/kreiner
 
 ancestry_hmm -i herb86_clumped_input_file.txt -s sample_file.txt -a 2 0.33 0.67 -p 0 100000 0.33 -p 1 -9999 0.43 -p 1 -100 0.24 --tmax 10000
 ```
-## Step (4) : process output from ancestry_hmm
+### Step (4) : process output from ancestry_hmm
 
+At this step, we realized the probabilities were very low, even on an one-pulse model. This is most certainly because we are calling ancestry on 86 sites, which is not a lot. We thus decide to go back a few steps and to call ancestry on a bigger set of variants. 
 
-
+## Calling ancestry on more sites
 
 
