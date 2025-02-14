@@ -12,7 +12,7 @@ Suite of notes and scripts for the drought project.
 
 [Drought selection experiment trajectory analyses](#Drought-selection-experiment-trajectory-analyses)
 
-[Herbarium dataset: ancestry mapping using ancestry hmm](#Herbarium-dataset---ancestry-mapping-using-ancestry-hmm)
+[Herbarium dataset - ancestry mapping using ancestry hmm](#Herbarium-dataset---ancestry-mapping-using-ancestry-hmm)
 
 [Calling ancestry on drought-informative sites only](##Calling-ancestry-on-drought-informative-sites-only)
     
@@ -803,5 +803,60 @@ ancestry_hmm -i herb86_clumped_input_file.txt -s sample_file.txt -a 2 0.33 0.67 
 At this step, we realized the probabilities were very low, even on an one-pulse model. This is most certainly because we are calling ancestry on 86 sites, which is not a lot. We thus decide to go back a few steps and to call ancestry on a bigger set of variants. 
 
 ## Calling ancestry on more sites
+
+### Step (1) : keep the variants common to the ancestry variant file and the herbarium variant file
+To build the file that will be used to call ancestry at each of the herbarium site, we keep the intersection between the ancestry variant file and the herbairum variant file using bcftools isec.
+
+```
+module load python/anaconda-2022.05
+source /software/python-anaconda-2022.05-el8-x86_64/etc/profile.d/conda.sh
+conda activate /project/kreiner
+
+#bgzip and tabix the vcf files
+
+anc=/scratch/midway3/rozennpineau/drought/ancestry_hmm/prep_ancestry/fst/ancestry_fst_q75.vcf.gz
+
+herb=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/merged_numericChr.vcf.gz
+
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/
+
+bcftools isec -p herb_ancestry $anc $herb
+
+```
+
+At this step, we have two variant files with the same variants for the two populations (976662 sites). I extract the position and chromosome information (bed) to calculate rho between each site. 
+
+### Step (2) : calculate rho between each site
+
+Extract chromosome and position information from the vcfs :
+
+```
+awk 'BEGIN {OFS="\t"} !/^#/ {print $1, $2-1, $2}' ancestry_common_976662.vcf  > ancestry_common_976662.be
+
+```
+
+Rscript to calculate rho between sites : [calculate_ldhat_between_sites.Rmd](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ldhat_between_sites.Rmd).
+
+Because we exclude the sites that are outside of the region defined by the recombination map (the monotonic spline does not extrapolate outside of boundaries), we kept track of which sites to filter out of the variant files to further filter the vcf files.
+
+```
+awk '{print $1,$2,$3}' ancestry_herb_common_974134.ld | tail -n -974134 > ancestry_herb_common_974134.bed
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
