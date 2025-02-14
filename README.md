@@ -6,6 +6,8 @@ Suite of notes and scripts for the drought project.
 
 [Ancestry mapping using ancestry hmm](#Ancestry-mapping-using-ancestry-hmm)
 
+[Processing results from ancestry_hmm output](#Processing-results-from-ancestry_hmm-output)
+
 [GWAS on ancestry calls](#GWAS-on-ancestry-calls)
 
 [Drought selection experiment trajectory analyses](#Drought-selection-experiment-trajectory-analyses)
@@ -15,7 +17,63 @@ Suite of notes and scripts for the drought project.
 
 # Ancestry mapping using ancestry hmm
 
-## Processing results from ancestry_hmm output
+
+[Ancestry_hmm](https://github.com/russcd/Ancestry_HMM) : tool to infer ancestry at input positions in the genome (Corbett-Detig, R. and Nielsen, R., 2017.)
+
+
+## Step (1) : define var rudis versus and var tuberculatus pure ancestry individuals
+To define the "ancestry panel" and not lose any of the drought data, we used an additional dataset, variants from common garden experiments used in Kreiner et al, 2022 that were realigned on a newer version of the reference genome. We ran structure with k=2, and kept individuals with pure ancestry with a threshold of 0.00001. We identified 44 pure var. rudis and 21 pure var. tuberculatus samples.
+
+```
+module load python/anaconda-2022.05
+source /software/python-anaconda-2022.05-el8-x86_64/etc/profile.d/conda.sh
+conda activate /project/kreiner
+
+my_bed=/scratch/midway3/rozennpineau/drought/ancestry_hmm/prep_ancestry/commongarden_allfiltsnps_193_hap2_numericChr_filt.bed
+
+for K in 2;
+
+do admixture --cv $my_bed $K ;
+
+done
+```
+
+### Step (2) : calculate Fst on ancestry sites with MAF <0.05
+We filtered the pure ancestry variant file (50,811,811 mutations) for minimum allele frequency of 0.05. To focus the analysis on ancestry-informative sites, we kept the sites with Fst values situated in the 75th percentile and above (2,089,620 variants, Fst calculated using VCFtools version 0.1.16).
+
+
+```
+#calculate fst per site with magf > 0.05
+module load vcftools
+
+VCF=/scratch/midway3/rozennpineau/drought/ancestry_hmm/prep_ancestry/ancestry.vcf.recode.vcf
+vcftools --vcf ${VCF} --maf 0.05 --recode --stdout > fst/ancestry_maf.vcf
+
+vcftools --vcf fst/ancestry_maf.vcf \
+--weir-fst-pop var_rudis_samp.list \
+--weir-fst-pop var_tub_samp.list \
+--out fst/ancestry_maf
+
+```
+
+Rscript to choose Fst threshold : [fst_on_ancestry.Rmd](https://github.com/rozenn-pineau/Drought-paper/blob/main/fst_on_ancestry.Rmd)
+
+### Step (3) : keep the variants common to the ancestry variant file and the drought variant file
+The ancestry was filtered for the high Fst sites. This filtered file was used to keep the intersection between the ancestry variant file and the drought variant file (bcftools isec).
+At this step, we have two variant files with the same variants for the two populations.
+
+
+
+
+
+
+
+
+
+
+
+
+# Processing results from ancestry_hmm output
 
 Ancestry_hmm gives as an output one file per sample, that has the following header :
 ```
