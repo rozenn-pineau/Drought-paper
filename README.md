@@ -4,7 +4,7 @@ Suite of notes and scripts for the drought project.
 
 # Outline
 
-[Drought dataset : ancestry mapping using ancestry hmm](#Drought-dataset---ancestry-mapping-using-ancestry-hmm)
+[Drought dataset - ancestry mapping using ancestry hmm](#Drought-dataset---ancestry-mapping-using-ancestry-hmm)
 
 [Processing results from ancestry_hmm output](#Processing-results-from-ancestry_hmm-output)
 
@@ -14,9 +14,9 @@ Suite of notes and scripts for the drought project.
 
 [Herbarium dataset: ancestry mapping using ancestry hmm](#Herbarium-dataset---ancestry-mapping-using-ancestry-hmm)
 
-        [Calling ancestry on drought-informative sites only](#Calling-ancestry-on-drought-informative-sites-only)
+[Calling ancestry on drought-informative sites only](##Calling-ancestry-on-drought-informative-sites-only)
     
-        [Calling ancestry on more sites](#Calling-ancestry-on-more-sites)
+[Calling ancestry on more sites](##Calling-ancestry-on-more-sites)
 
 
 
