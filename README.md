@@ -840,9 +840,73 @@ Rscript to calculate rho between sites : [calculate_ldhat_between_sites.Rmd](htt
 Because we exclude the sites that are outside of the region defined by the recombination map (the monotonic spline does not extrapolate outside of boundaries), we kept track of which sites to filter out of the variant files to further filter the vcf files.
 
 ```
+#make bed file
 awk '{print $1,$2,$3}' ancestry_herb_common_974134.ld | tail -n -974134 > ancestry_herb_common_974134.bed
+
+#filter
+module load vcftools
+bed=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/ancestry_herb_common_974134.bed
+vcf1=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/herb_ancestry/herb_common_976662.vcf
+vcftools --vcf $vcf1 --bed $bed --out herb_common_974134.vcf --recode
+
+vcf2=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/herb_ancestry/ancestry_common_976662.vcf
+vcftools --vcf $vcf2 --bed $bed --out ancestry_common_974134.vcf --recode
+
 ```
 
+### Step (3) : split ancestry vcf into tuberculatus versus rudis files
+
+The ancestry file both has var rudis and var tuberculatus samples, that we will now split into two :
+
+```
+bcftools view -S var_rudis_samp.txt ancestry_common_974133.vcf > rudis_common_974133.vcf
+bcftools view -S var_tub_samp.txt ancestry_common_974133.vcf > tub_common_974133.vcf
+
+#check # of variants and samples
+#44 samples for rudis and 21 samples for tuberculatus
+#974133 variants for both
+```
+
+
+### Step (4) : extract allele counts from the ancestry variant files
+
+[genotype_to_allele_counts.awk](https://github.com/rozenn-pineau/Drought-paper/blob/main/genotype_to_allele_counts.awk)
+
+```
+/scratch/midway3/rozennpineau/drought/scripts/genotype_to_allele_counts.awk tub_common_974133.vcf > tub_common_974133.allele_counts
+
+/scratch/midway3/rozennpineau/drought/scripts/genotype_to_allele_counts.awk rudis_common_974133.vcf > rudis_common_974133.allele_counts
+
+```
+
+### Step (5) : get genotypes for drought panel
+
+2,0 for homs reference
+1,1 for hets
+0,2 for homs alternative
+
+[vcf_to_read_counts.awk](https://github.com/rozenn-pineau/Drought-paper/blob/main/vcf_to_read_counts.awk)
+
+### Step (6) : put the file together
+
+Paste columns together to make the full file, following instructions on ancestry_hmm github page. 
+
+```
+
+
+#var rudis allele counts 
+awk '{OFS="\t"; print $3,$4}' tub_common_974133.allele_counts > var_rud.allele_counts
+
+#rho column
+awk '{OFS="\t"; print $4}' ancestry_herb_common_974133.ld > ancestry_herb_common_974133_rho.ld
+
+#assemble chrom, pos, var tub allele counts, var rudis allele counts, rho, then sample read counts
+paste tub_common_974133.allele_counts var_rud.allele_counts ancestry_herb_common_974133_rho.ld herb_common_974133.read_counts > herb_common_974133_input_file.txt
+
+
+```
+
+### Step (7) : make sample file
 
 
 
