@@ -14,9 +14,9 @@ Suite of notes and scripts for the drought project.
 
 [Herbarium dataset - ancestry mapping using ancestry hmm](#Herbarium-dataset---ancestry-mapping-using-ancestry-hmm)
 
-[Calling ancestry on drought-informative sites only](##Calling-ancestry-on-drought-informative-sites-only)
+[Calling ancestry on drought-informative sites only](#Calling-ancestry-on-drought-informative-sites-only)
     
-[Calling ancestry on more sites](##Calling-ancestry-on-more-sites)
+[Calling ancestry on more sites](#Calling-ancestry-on-more-sites)
 
 
 
@@ -909,12 +909,77 @@ paste tub_common_974133.allele_counts var_rud.allele_counts ancestry_herb_common
 ### Step (7) : make sample file
 
 
+# Process output from ancestry_hmm
+
+```
+folder_name=$(basename "$PWD")
+output_file="${folder_name}_values_09.txt"
+cutoff=0.9
+
+#initialize dataset with chrom and pos
+awk 'BEGIN { OFS="\t" } {print $1,$2}' HB0900.posterior > $output_file
+
+#loop through each individual and paste information to previous version of the file
+for file in *.posterior; do
+
+    header_name=$(basename "$file" .posterior)
+
+    awk -v header="$header_name" 'NR == 1 { print header; }
+    
+    NR > 1 {
+    
+    result = "NA";
+    if ($3 > $cutoff) {result = "0"}
+    else if ($4 > $cutoff) {result = "1"}
+    else if ($5 > $cutoff) {result = "1"}
+    else if ($6 > $cutoff) {result = "2"}
+    else if ($7 > $cutoff) {result = "2"}
+    else if ($8 > $cutoff) {result = "2"}
+    print result;
+    }' $file > tmp
+
+    paste $output_file tmp > tmp2
+
+    mv tmp2 $output_file
+
+done
+```
+
+This is for every site in common between the herbarium variant file and the ancestry panels. We are interest in the trajectories of drought-informative alleles. Let's filter the file for those sites only.  
 
 
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/1_two_pulse_flexible_proportions
 
+# Input files
+bed=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/FDR_non_clumped_significant_sites.bed
+assoc=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/1_two_pulse_flexible_proportions/anc_calls_herbarium_all_sites_09.txt
+out=/scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/1_two_pulse_flexible_proportions/anc_calls_herbarium_893sites_09.txt
 
+# Define column positions for chrom and pos in the TXT file (1-based index)
+CHROM_COL=1
+POS_COL=2
 
+# Convert column positions to AWK's 1-based indexing
+awk -v chrom_col="$CHROM_COL" -v pos_col="$POS_COL" '
+    NR==FNR {sites[$1][$3]; next}
+    {
+        chrom = $chrom_col;
+        pos = $pos_col;
+        if (chrom in sites)
+            for (s in sites[chrom])
+                if (pos >= s && pos <= s)
+                    print $0;
+    }' "$bed" "$assoc" > "$out"
 
+echo "Filtering complete. Results saved in $out"
+
+mv anc_calls_herbarium_893sites_09.txt anc_calls_herbarium_680sites_09.txt
+#680 sites in common
+
+#add header back to ancestry call file
+```
+We now have 680 sites with ancestry calls, that are drought informative sites. 
 
 
 
