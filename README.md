@@ -947,6 +947,7 @@ done
 
 This is for every site in common between the herbarium variant file and the ancestry panels. We are interest in the trajectories of drought-informative alleles. Let's filter the file for those sites only.  
 
+### (1) filter ancestry call table for drought informative sites
 
 ```
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/1_two_pulse_flexible_proportions
@@ -981,8 +982,42 @@ mv anc_calls_herbarium_893sites_09.txt anc_calls_herbarium_680sites_09.txt
 ```
 We now have 680 sites with ancestry calls, that are drought informative sites. 
 
+### (2) Filter association file for these 680 drought informative sites
+```
+#make bed from vcf file
+vcf=anc_calls_herbarium_680sites_09.vcf 
+bed=anc_calls_herbarium_680sites_09.bed
 
-## Think for LD with plink clump command
+awk 'BEGIN {OFS="\t"} 
+     !/^#/ {print $1, $2-1, $2}' "$vcf" > "$bed" #position in vcf is shifted by one
+
+# Input files
+bed=anc_calls_herbarium_680sites_09.bed
+assoc=/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt
+out=FDR_non_clumped_680sites.assoc.txt
+
+# Define column positions for chrom and pos in the TXT file (1-based index)
+CHROM_COL=13  
+POS_COL=14    
+
+
+# Convert column positions to AWK's 1-based indexing
+awk -v chrom_col="$CHROM_COL" -v pos_col="$POS_COL" '
+    NR==FNR {sites[$1][$3]; next}  
+    { 
+        chrom = $chrom_col; 
+        pos = $pos_col;
+        if (chrom in sites) 
+            for (s in sites[chrom]) 
+                if (pos >= s && pos <= s) 
+                    print $0;
+    }' "$bed" "$assoc" > "$out"
+
+echo "Filtering complete. Results saved in $out"
+
+```
+
+### (3) make vcf file for plink LD thinning
 
 Plink takes in a vcf file, that we create based on the ancestry call table. 
 
