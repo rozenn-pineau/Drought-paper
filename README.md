@@ -982,7 +982,65 @@ mv anc_calls_herbarium_893sites_09.txt anc_calls_herbarium_680sites_09.txt
 We now have 680 sites with ancestry calls, that are drought informative sites. 
 
 
+## Think for LD with plink clump command
 
+Plink takes in a vcf file, that we create based on the ancestry call table. 
+
+```
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/1_two_pulse_flexible_proportions/
+
+# Input and output files
+input_file="anc_calls_herbarium_680sites_09.txt"
+output_file="anc_calls_herbarium_680sites_09.vcf"
+
+# Create the VCF header
+cat <<EOL > $output_file
+##fileformat=VCFv4.2
+##source=CustomScript
+##INFO=<ID=.,Number=1,Type=String,Description="Custom info">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+EOL
+echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t$(head -1 $input_file | cut -f3- | tr -s ' ' '\t')" >> $output_file
+
+
+# Transform the input data into VCF format
+tail -n +2 $input_file | while read -r line; do
+    # Parse the fields
+    chrom=$(echo "$line" | awk '{print $1}')
+    pos=$(echo "$line" | awk '{print $2}')
+    genotypes=$(echo "$line" | cut -f3-)
+
+    # Convert genotypes to VCF GT format
+    formatted_genotypes=$(echo "$genotypes" | awk '
+    {
+        for (i = 1; i <= NF; i++) {
+            if ($i == 0) $i = "0|0";      # Homozygous reference
+            else if ($i == 1) $i = "1|0";      # Heterozygote
+            else if ($i == 2) $i = "1|1"; # Homozygous alternate
+            else $i = "./.";              # Missing data or unrecognized value
+        }
+        print $0
+    }' | sed 's/ /\t/g')
+
+    # Placeholder values for REF, ALT, ID, QUAL, FILTER, INFO
+    ref="A" # Adjust this to your data's REF allele
+    alt="T" # Adjust this to your data's ALT allele
+    id="." # No variant ID provided
+    qual="."
+    filter="PASS"
+    info="."
+    format="GT"
+
+    # Print the VCF record
+    echo -e "$chrom\t$pos\t$id\t$ref\t$alt\t$qual\t$filter\t$info\t$format\t$formatted_genotypes" >> $output_file
+done
+
+echo "VCF file created: $output_file"
+
+
+#fill in the ID field by combining chrom and pos
+awk 'NR <= 5 {print; next} {OFS="\t"; $3 = $1 ":" $2; print}' anc_calls_herbarium_680sites_09.vcf > anc_calls_herbarium_680sites_09_ID.vcf
+```
 
 
 
