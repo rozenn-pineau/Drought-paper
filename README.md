@@ -10,6 +10,8 @@ Suite of notes and scripts for the drought project.
 
 [GWAS on ancestry calls](#GWAS-on-ancestry-calls)
 
+[GO enrichment analyses and sites of potential interest](#GO-enrichment-analyses-and-sites-of-potential-interest)
+
 [Drought selection experiment trajectory analyses](#Drought-selection-experiment-trajectory-analyses)
 
 [Herbarium dataset - ancestry mapping using ancestry hmm](#Herbarium-dataset---ancestry-mapping-using-ancestry-hmm)
@@ -491,6 +493,42 @@ two_pulse_flexible_prop_2]$ bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n'
 
 Our expectation is that var. rudis ancestry is better adapted to drought than var. tuberculatus. 
 Do we see this in our ancestry calls ? This is also simply a way to make sure that our pipeline was coded correctly. 
+
+# GO enrichment analyses and sites of potential interest
+
+We identified 35 sites significantly associated with drought adaptation. To test whether thos sites are in functional regions of the genome with known effects, we extracted the regions from the annotated genome file.
+
+The gff file has "Scaffold_" as chromosome names, so I need to update the bed chromosome names :
+
+```
+awk -F'\t' -vOFS='\t' '{ $1 = "Scaffold_" $1}1' ancestry_gwas_filtered_sites.bed > ancestry_gwas_filtered_sites_scaffold_names.bed 
+```
+Intersect the bed file with the gff file using bedtools :
+
+```
+bedtools intersect -b ancestry_gwas_filtered_sites_scaffold_names.bed -a /project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff > intersect_FDR_gff_enriched_genes.txt
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
