@@ -508,7 +508,12 @@ Intersect the bed file with the gff file using bedtools :
 ```
 bedtools intersect -b ancestry_gwas_filtered_sites_scaffold_names.bed -a /project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff > intersect_FDR_gff_enriched_genes.txt
 ```
+Extract the GO terms and Note field from the file : 
 
+```
+cut -d ";" -f 9 intersect_FDR_gff_enriched_genes.txt | grep GO > intersect_FDR_gff_GO_terms_bon.txt
+cut -d ";" -f 10 intersect_FDR_gff_enriched_genes.txt | grep Note > intersect_FDR_gff_note.txt
+```
 
 
 
