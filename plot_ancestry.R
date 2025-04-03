@@ -12,7 +12,7 @@ rud_col <- "#CBCE91FF"
 het_col <- "#44A3BB"
 
 # values is a matrix with the ancestry information for each site (rows) and each individual (columns)
-setwd("/scratch/midway3/rozennpineau/drought/ancestry_hmm/manual_gwas/two_pulse_flexible_prop_2")
+setwd("/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/")
 values <- read.table("/scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2/two_pulse_flexible_prop_2_values.txt", sep = "\t", header = T)
 #rm outliers
 values <- values[,-c(which(colnames(values) == "P16_Nat_1_T" | colnames(values) == "P12_Nat_14_T"))] #282 samples
