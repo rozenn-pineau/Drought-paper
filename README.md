@@ -573,7 +573,7 @@ cut -d ";" -f 10 intersect_FDR_gff_enriched_genes.txt | grep Note > intersect_FD
 ## upload scripts for trajectory analyses
 
 ### Compare to randomized distribution
-We calculate the allele frequency change at each site using the following script : [calculate_anc_calls_fq.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_anc_calls_fq.R).
+Step (1) : generate list with allele frequency change from day 20 to day 1 for similar starting allele frequencies (0.001 precision) : [generate_null.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/generate_null.R).
 
 
 
