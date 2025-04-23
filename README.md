@@ -1187,3 +1187,10 @@ tabix -f anc_calls_herbarium_34sites.recode.vcf.gz
 
 bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' anc_calls_herbarium_34sites.recode.vcf.gz > anc_calls_herbarium_34sites_GT.txt
 ```
+
+
+
+## Estimating ancestry variation across the genome
+
+To estimate the vaiation in ancestry across the genome, we called the mean ancestruy per individual based on 1Mb windows across the genome using [estimate_ancestry_variation.sh](https://github.com/rozenn-pineau/Drought-paper/blob/main/estimate_ancestry_variation.sh). 
+
