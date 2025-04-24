@@ -22,6 +22,8 @@ Suite of notes and scripts for the drought project.
     
 [Calling ancestry on more sites](#Calling-ancestry-on-more-sites)
 
+[Calculating Hazard Ratios on ancestry calls](#Calculating-Hazard-Ratios-on-ancestry-calls)
+
 # Estimating global ancestry using ADMIXTURE
 To calculate genome-wide ancestry, we used ADMIXTURE version 1.3.0 (Alexander et al., 2009). 
 We tested different values for K and settled on K=2: 
@@ -1193,4 +1195,12 @@ bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' anc_calls_herbarium_34sites
 ## Estimating ancestry variation across the genome
 
 To estimate the vaiation in ancestry across the genome, we called the mean ancestruy per individual based on 1Mb windows across the genome using [estimate_ancestry_variation.sh](https://github.com/rozenn-pineau/Drought-paper/blob/main/estimate_ancestry_variation.sh). 
+
+## Calculating Hazard Ratios on ancestry calls
+To evaluate the advantage of bearing each drought-adapted site independently as well as the combination of them, we calculate the hazard ratios (Cox model) : 
+- individual tests : [cox_ancestry_calls.Rmd](https://github.com/rozenn-pineau/Drought-paper/blob/main/cox_ancestry_calls.Rmd)
+- test on polygenic scores : 
+
+
+
 
