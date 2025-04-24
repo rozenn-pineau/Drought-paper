@@ -1196,11 +1196,52 @@ bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' anc_calls_herbarium_34sites
 
 To estimate the vaiation in ancestry across the genome, we called the mean ancestruy per individual based on 1Mb windows across the genome using [estimate_ancestry_variation.sh](https://github.com/rozenn-pineau/Drought-paper/blob/main/estimate_ancestry_variation.sh). 
 
+
+
 ## Calculating Hazard Ratios on ancestry calls
 To evaluate the advantage of bearing each drought-adapted site independently as well as the combination of them, we calculate the hazard ratios (Cox model) : 
 - individual tests : [cox_ancestry_calls.Rmd](https://github.com/rozenn-pineau/Drought-paper/blob/main/cox_ancestry_calls.Rmd)
 - test on polygenic scores : 
 
 
+## Compare Drought sites from the Drought experiment and the sites identified as agriculturally adapted in Kreiner et al. 2022
+We compared the sites that we identified in the drought experiment, to the sites that had been labeled as "agriculturally adapted" in the Kreiner 2022 paper.
+There was 56 out of 893 sites in common with the drought dataset, and the drought only dataset where the CMH scan looked for agriculturally-enriched alleles (out of 383650 variants).
+
+There was 54 sites in common between the drought dataset and the drought+common garden combined datasets where the CMH scan looked for agriculturally-enriched alleles (149883 variants). 
+
+Example of how files were compared : 
+```
+#drought and common garden CMH scan comparison
+
+cat FDRcmh_dcg | \sed s/^\"Scaffold_//g > tmp1
+
+cat tmp1 | \sed s/\"//g > tmp2
+
+awk '{ if ($13 <= 0.05) { print $1,$3-1,$3} }' tmp2 > FDR_significant_drought_commongarden_CMH_sites.bed #149883 sites
+
+awk 'OFS="\t" {print $1,$2,$3}' FDR_significant_drought_commongarden_CMH_sites.bed > FDR_significant_drought_commongarden_CMH_sites_tab.bed # tab
+
+bedtools intersect -a FDR_significant_drought_commongarden_CMH_sites_tab.bed  -b FDR_significant_drought_sites.bed > overlap_CHdrought_common_garden_drought.bed #54
+```
+
+In which genes are these variants situated ?
+
+
+```
+#update chromosome names
+awk -F'\t' -vOFS='\t' '{ $1 = "Scaffold_" $1}1' FDR_significant_drought_commongarden_CMH_sites_tab.bed > FDR_significant_drought_commongarden_CMH_sites_scaffold_names.bed
+
+#Intersect with bedtools :
+bedtools intersect -b FDR_significant_drought_commongarden_CMH_sites_scaffold_names.bed -a /project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff > intersect_CHMscan_drought_commongarden_gff.txt
+
+#how many chromosomes are the genes in
+grep Atub intersect_CHMscan_drought_commongarden_gff.txt | cut  -f1 | uniq # all 16 chromosomes
+
+#grep unique gene names to count the number of genes
+grep ID= intersect_CHMscan_drought_commongarden_gff.txt | cut -d'=' -f2 | grep hap2 | cut -d'-' -f1 | uniq > gene_names.tmp
+cut -d';' -f1 gene_names.tmp | uniq > genes_commongarden_drought_gff.txt
+
+```
 
 
