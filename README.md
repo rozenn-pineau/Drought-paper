@@ -1245,3 +1245,13 @@ cut -d';' -f1 gene_names.tmp | uniq > genes_commongarden_drought_gff.txt
 ```
 
 
+# Herbarium and climate data analyses
+
+### Extracting the climate data at each herbarium sample location
+Step (1) - find the closest weather station with mean temperature and precipitation dating back to 1828, which is our earliest herbarium sample. 
+Step (2) - extract the climate data for every year since 1828 for these weather stations. 
+
+
+
+
+
