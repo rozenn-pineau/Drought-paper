@@ -617,20 +617,15 @@ snpEff ann Atub_193_hap2 FDR_significant_drought_sites_scaffold_names.vcf > FDR_
 we want to compare the outputs from the CMH scans that identidied "agriculturally-adapted alleles" to the output of the GWAS on drought. I do this by comparing bed files both both (1) all loci, and (2) significant loci in both. 
 
 
-From the GWAS analysis in R, I output two bed files : (1) every site with FDR correction and (2) the 893 significant sites with FDR correction.
-
-On the cluster, I also prepared the bed files for the CMH scans for comparison. 
+On the cluster, I prepare the bed files for the CMH scans for comparison. 
 ```
 #prepare the full CMH file bed (FDRdrought is the CMH scan output)
 cat FDRdrought | \sed s/^\Scaffold_//g | awk -v OFS="\t" '{ print $1,$3,$3,$13}' > CMH_all.bed #63,979,747
 #remove header
 tail -n +2 CMH_all.bed > CMH_49338567.bed
-
-#prepare the significant loci bed
-cat FDRdrought | \sed s/^\Scaffold_//g | awk -v OFS="\t" '{ if ($13 <= 0.05) { print $1,$3,$3,$13} }' > CMH_383650.bed #383650
 ```
 
-Then I use bedtools intersect to find intersections between both sets of beds. 
+Then I use bedtools intersect to find intersections between both beds. 
 
 ```
 #!/bin/bash
@@ -655,15 +650,27 @@ gwasbed=gwas_all.bed
 cmhbed=CMH_all.bed
 bedtools intersect -a $gwasbed -b $cmhbed -wa -wb -f 0.99 -r > intersect_all_drought_cmh_gwas.bed
 #-r 1 -f 1 requires that there is at least 1 bp match, with 100% of the regions matching
-
-gwasbed=gwas_893.bed
-cmhbed=CMH_383650.bed
-bedtools intersect -a $gwasbed -b $cmhbed -wa -wb -f 0.99 -r > intersect_significant_drought_cmh_gwas.bed
 ```
 
 I further plot the data using R. 
 
 
+I further look for where in the genome the hits are : are there in genes ? I look into the gff file for this.
+```
+#add “Scaffold_” to overlap bed
+awk -v OFS='\t' '{$1 = "Scaffold_" $1}1' common_significant_cmh_gwas.bed > common_significant_cmh_gwas_scaffold.bed
+awk -v OFS="\t" '{print $1, $2, $2}' common_significant_cmh_gwas_scaffold.bed > common_significant_cmh_gwas_scaffold_clean.bed
+```
+
+#bedtools intersect with gff
+```
+bedtools intersect -a common_significant_cmh_gwas_scaffold_clean2.bed -b /project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff -wo > overlap_gwas_cmh_gff.bed
+```
+
+#extract gene names
+```
+cut -f 12 overlap_gwas_cmh_gff.bed | grep "Similar" | cut -d" " -f3 | cut -d":" -f1 | uniq > gwas_cmh_genes.txt
+```
 
 
 
