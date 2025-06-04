@@ -1210,8 +1210,9 @@ awk -v chrom_col="$CHROM_COL" -v pos_col="$POS_COL" '
 echo "Filtering complete. Results saved in $out"
 
 ```
+### (3) make vcf file for plink LD thinning and drop variants with more than 75% missing data
 
-### (3) make vcf file for plink LD thinning
+**make vcf file**
 
 Plink takes in a vcf file, that we create based on the ancestry call table. 
 
@@ -1270,15 +1271,28 @@ echo "VCF file created: $output_file"
 #fill in the ID field by combining chrom and pos
 awk 'NR <= 5 {print; next} {OFS="\t"; $3 = $1 ":" $2; print}' anc_calls_herbarium_680sites_09.vcf > anc_calls_herbarium_680sites_09_ID.vcf
 ```
-### (4) LD thinning 
+
+**drop loci with more than 75% missing data**
+
+
+### (4) Clumping based on LD
 
 ```
 assoc=FDR_non_clumped_680sites_header.assoc.txt
-plink --file anc_calls_herbarium_680sites_09_ID --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out anc_calls_herbarium_680sites_09_ID_100kb_clumped --allow-no-sex --allow-extra-chr --clump-snp-field ID
+cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/herbarium/2_more_sites/1_two_pulse_flexible_proportions
+#without missing loci threshold
+plink --file anc_calls_herbarium_680sites_09_ID --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out /scratch/midway2/rozennpineau/drought/herbarium/anc_calls_herbarium_680sites_09_ID_100kb_clumped --allow-no-sex --allow-extra-chr --clump-snp-field ID
+# --clump: 34 clumps formed from 680 top variants.
+
+#with missing loci threshold
+plink --geno 0.25 --file anc_calls_herbarium_680sites_09_ID --clump $assoc --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out /scratch/midway2/rozennpineau/drought/herbarium/anc_calls_herbarium_680sites_09_ID_100kb_clumped_nomiss --allow-no-sex --allow-extra-chr --clump-snp-field ID
+#--geno <threshold>: removes SNPs where the missing genotype proportion exceeds the provided threshold. --geno 0.25 removes loci with more than 25% missing genotype data, which corresponds to keeping loci with at least 75% non-missing genotype data.
+
+#--clump: 18 clumps formed from 443 top variants.
 ```
 
 
-### (5) extract thinned variants
+### (5A) extract clumped variants - with missing calls
 (1) make bed file to filter ancestry calls vcf file
 ```
 file=anc_calls_herbarium_680sites_09_ID_100kb_clumped.clumped
@@ -1308,11 +1322,41 @@ tabix -f anc_calls_herbarium_34sites.recode.vcf.gz
 bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' anc_calls_herbarium_34sites.recode.vcf.gz > anc_calls_herbarium_34sites_GT.txt
 ```
 
+### (5B) extract clumped variants - without missing calls
+(1) make bed file to filter ancestry calls vcf file
+
+```
+file=/scratch/midway2/rozennpineau/drought/herbarium/anc_calls_herbarium_680sites_09_ID_100kb_clumped_nomiss.clumped
+
+awk -v OFS='\t' '{ print $1, $4, $4, $5}' $file | head -19 > full.bed #extract cols 1 and 4 for position information, 5 for p value
+
+```
+
+(2) filter the vcf file based on the bed file
+
+```
+
+module load vcftools
+cd /scratch/midway2/rozennpineau/drought/herbarium
+vcftools --vcf anc_calls_herbarium_680sites_09_ID.vcf --bed full.bed --out anc_calls_herbarium_18sites --recode
+
+```
+
+(3) getting ancestry calls for downstream analyses
+
+```
+bgzip -f anc_calls_herbarium_18sites.recode.vcf 
+
+tabix -f anc_calls_herbarium_18sites.recode.vcf.gz
+
+bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' anc_calls_herbarium_18sites.recode.vcf.gz > anc_calls_herbarium_18sites_GT.txt
+
+```
 
 
 ## Estimating ancestry variation across the genome
 
-To estimate the vaiation in ancestry across the genome, we called the mean ancestruy per individual based on 1Mb windows across the genome using [estimate_ancestry_variation.sh](https://github.com/rozenn-pineau/Drought-paper/blob/main/estimate_ancestry_variation.sh). 
+To estimate the vaiation in ancestry across the genome, we called the mean ancestry per individual based on 1Mb windows across the genome using [estimate_ancestry_variation.sh](https://github.com/rozenn-pineau/Drought-paper/blob/main/estimate_ancestry_variation.sh). 
 
 
 
