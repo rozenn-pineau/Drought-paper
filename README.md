@@ -623,9 +623,16 @@ On the cluster, I prepare the bed files for the CMH scans for comparison.
 cat FDRdrought | \sed s/^\Scaffold_//g | awk -v OFS="\t" '{ print $1,$3,$3,$13}' > CMH_all.bed #63,979,747
 #remove header
 tail -n +2 CMH_all.bed > CMH_49338567.bed
+
+#prepare the significant loci bed
+cat FDRdrought | \sed s/^\Scaffold_//g | awk -v OFS="\t" '{ if ($13 <= 0.05) { print $1,$3,$3,$13} }' > CMH_383650.bed #383650
+
+#I also subselect the sites that make through the Bonferonni threshold. 
+cat FDRdrought | \sed s/^\Scaffold_//g | awk -v OFS="\t" '{ if ($14 <= 0.05) { print $1,$3,$3,$14} }' > CMH_BON.bed  #1419 loci
+
 ```
 
-Then I use bedtools intersect to find intersections between both beds. 
+Then I use bedtools intersect to find intersections between beds. 
 
 ```
 #!/bin/bash
@@ -650,9 +657,17 @@ gwasbed=gwas_all.bed
 cmhbed=CMH_all.bed
 bedtools intersect -a $gwasbed -b $cmhbed -wa -wb -f 0.99 -r > intersect_all_drought_cmh_gwas.bed
 #-r 1 -f 1 requires that there is at least 1 bp match, with 100% of the regions matching
-```
 
-I further plot the data using R. 
+gwasbed=gwas_893.bed
+cmhbed=CMH_383650.bed
+bedtools intersect -a $gwasbed -b $cmhbed -wa -wb -f 0.99 -r > intersect_significant_drought_cmh_gwas.bed
+
+#for Bonferronni loci
+gwasbed=gwas_893.bed
+cmhbed=CMH_BON.bed 
+bedtools intersect -a $gwasbed -b $cmhbed > intersect_BON_drought_cmh_gwas.bed #no intersection found
+
+```
 
 
 I further look for where in the genome the hits are : are there in genes ? I look into the gff file for this.
