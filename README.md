@@ -1429,6 +1429,14 @@ Step (1) - find the closest weather station with mean temperature and precipitat
 Step (2) - extract the climate data for every year since 1828 for these weather stations. 
 
 
+### Haplotype frequency change with climate change 
+One we extracted the weather data for each sample at each date, we looked for consistent change through time in both climate and haplotype frequencies. 
+Does an increase in temperature correlate with an increase in drought-adapted haplotype frequency ?
+
+To do this, we calculated the physical distance between each pair of sample and kept the two samples that were the closest in space, with a maximum distance of 100 km. For each pwit, we calculated the allele frequency change (the time difference here can change according to the sample pair) and the climate change (total precipitation  and max temperature for the months of June, July, August combined). We ended up with 36 pairs for max temperature, 41 pairs for precipitation and 36 pairs for climate PC1). 
+
+We identified a few different sites that track climate. 
+
 
 
 
