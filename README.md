@@ -25,6 +25,9 @@ Suite of notes and scripts for the drought project.
 
 [Calculating Hazard Ratios on ancestry calls](#Calculating-Hazard-Ratios-on-ancestry-calls)
 
+[Climate-Genotype correlation analyses](#Climate-Genotype-correlation-analyses)
+
+
 # Estimating global ancestry using ADMIXTURE
 To calculate genome-wide ancestry, we used ADMIXTURE version 1.3.0 (Alexander et al., 2009). 
 We tested different values for K and settled on K=2: 
@@ -1437,6 +1440,11 @@ To do this, we calculated the physical distance between each pair of sample and 
 
 We identified a few different sites that track climate. 
 
+# Climate-Genotype correlation analyses
 
+[Figure 5 analyses - correlations between climate change and haplotype frequency changes]
 
+Scrit for pairwise comparisons : order the pairwise distance between samples by ascending order; find the two closest samples, set aside; find the closest sample of the next one in the list, set aside; repeat until all samples have been used (23 pairs); calculate haplotype frequency change and climate change, test linear relationship, record if significant **and** postisive; go back to the list and start with the second sample this time, repeat (146 times for 146 possible pairs with distance in km >0 and < 100). 
+
+For temperature max  : [run_pairwise_data.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/run_pairwise_data.R)
 
