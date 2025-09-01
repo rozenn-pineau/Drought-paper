@@ -675,18 +675,28 @@ bedtools intersect -a $gwasbed -b $cmhbed > intersect_BON_drought_cmh_gwas.bed #
 
 I further look for where in the genome the hits are : are there in genes ? I look into the gff file for this.
 ```
+#prep bed file
+awk '{OFS="\t";print $1, $2, $2}' common_significant_cmh_015.bed > cmh_015.bed
+tail -n 13602 cmh_015.bed > cmh_015_noheader.bed
+
 #add “Scaffold_” to overlap bed
-awk -v OFS='\t' '{$1 = "Scaffold_" $1}1' common_significant_cmh_gwas.bed > common_significant_cmh_gwas_scaffold.bed
+awk -v OFS="\t" '{$1 = "Scaffold_" $1}1' cmh_015_noheader.bed > cmh_015_noheader_scaffold.bed
+awk -v OFS="\t" '{$1 = "Scaffold_" $1}1' cmh_gwas_35.bed > cmh_gwas_35_scaffold.bed
 awk -v OFS="\t" '{print $1, $2, $2}' common_significant_cmh_gwas_scaffold.bed > common_significant_cmh_gwas_scaffold_clean.bed
 ```
 
 #bedtools intersect with gff
 ```
+#remove header from bed file for bedtools intersect
+bedtools intersect -a cmh_015_noheader_scaffold.bed -b /project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff -wo > overlap_cmh_015_gff.bed
+bedtools intersect -a cmh_gwas_35_scaffold_noheader.bed -b /project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff -wo > overlap_gwas_cmh_35_gff.bed
 bedtools intersect -a common_significant_cmh_gwas_scaffold_clean2.bed -b /project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff -wo > overlap_gwas_cmh_gff.bed
 ```
 
 #extract gene names
 ```
+cut -f 12 overlap_cmh_015_gff.bed | grep "Similar" | cut -d" " -f3 | cut -d":" -f1 | sort | uniq > gwas_cmh_genes_35.txt
+cut -f 12 overlap_gwas_cmh_35_gff.bed | grep "Similar" | cut -d" " -f3 | cut -d":" -f1 | sort | uniq > gwas_cmh_genes_35.txt
 cut -f 12 overlap_gwas_cmh_gff.bed | grep "Similar" | cut -d" " -f3 | cut -d":" -f1 | uniq > gwas_cmh_genes.txt
 ```
 
