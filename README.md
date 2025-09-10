@@ -490,9 +490,16 @@ head -n 36 full2.bed > ancestry_gwas_filtered_sites.bed
 (2) filter the vcf file based on the bed file
 
 ```
+#Add header to bed file
+awk '{print
+ancestry_gwas_filtered_sites.bed
+
+
 module load vcftools
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2
 vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filtered_sites.bed --out two_pulse_flexible_prop_2_values_ID_filtered --recode
+
+
 ```
 
 output 
