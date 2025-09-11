@@ -3,6 +3,8 @@ Suite of notes and scripts for the drought project.
 
 
 # Outline
+[Drought LD50 calculations](#Drought-LD50-calculations)
+
 [Herbicide resistance : EPSPS depth estimations](#Herbicide-resistance-:-EPSPS-depth-estimations)
 
 [Estimating global ancestry using ADMIXTURE](#Estimating-global-ancestry-using-ADMIXTURE)
@@ -28,6 +30,7 @@ Suite of notes and scripts for the drought project.
 
 [Climate-Genotype correlation analyses](#Climate-Genotype-correlation-analyses)
 
+# Drought LD50 calculations
 
 # Herbicide resistance : EPSPS depth estimations
 To quantify resistance in drought samples, we calculated the depth at EPSPS position in each sample. 
