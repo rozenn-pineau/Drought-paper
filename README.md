@@ -497,7 +497,7 @@ ancestry_gwas_filtered_sites.bed
 
 module load vcftools
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2
-vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filtered_sites.bed --out two_pulse_flexible_prop_2_values_ID_filtered --recode
+vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filtered_sites_wheader.bed --out two_pulse_flexible_prop_2_values_ID_filtered --recode
 
 
 ```
@@ -505,31 +505,30 @@ vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filte
 output 
 
 ```
-VCFtools - 0.1.16
-(C) Adam Auton and Anthony Marcketta 2009
-
 Parameters as interpreted:
-        --vcf two_pulse_flexible_prop_2_values_ID.vcf
-        --out two_pulse_flexible_prop_2_values_ID_filtered.vcf
-        --recode
-        --bed ancestry_gwas_filtered_sites.bed
+	--vcf two_pulse_flexible_prop_2_values_ID.vcf
+	--out two_pulse_flexible_prop_2_values_ID_filtered
+	--recode
+	--bed ancestry_gwas_filtered_sites_wheader.bed
 
 After filtering, kept 282 out of 282 Individuals
 Outputting VCF file...
-        Read 36 BED file entries.
-After filtering, kept 35 out of a possible 786261 Sites
-Run Time = 4.00 seconds
+	Read 37 BED file entries.
+After filtering, kept 36 out of a possible 786261 Sites
+Run Time = 3.00 seconds
 ````
-Why did we lose one site here ?
+36 loci in the output vcf file.
 
 
 Getting the ancestry calls (in the form of genotypes) from the filtered vcf for more downstream analyses :
 ```
+module load htslib
 bgzip -f two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf
 
 tabix -f two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf.gz
 
-two_pulse_flexible_prop_2]$ bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf.gz > two_pulse_flexible_prop_2_values_ID_filtered_GT.txt
+act-conda
+bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf.gz > two_pulse_flexible_prop_2_values_ID_filtered_GT.txt #36 loci
 ```
 
 
@@ -540,7 +539,7 @@ Do we see this in our ancestry calls ? This is also simply a way to make sure th
 
 # GO enrichment analyses and sites of potential interest
 
-We identified 35 sites significantly associated with drought adaptation. To test whether thos sites are in functional regions of the genome with known effects, we extracted the regions from the annotated genome file.
+We identified 36 sites significantly associated with drought adaptation. To test whether those sites are in functional regions of the genome with known effects, we extracted the regions from the annotated genome file.
 
 The gff file has "Scaffold_" as chromosome names, so I need to update the bed chromosome names :
 
