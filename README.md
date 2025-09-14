@@ -495,9 +495,9 @@ plink --vcf two_pulse_flexible_prop_2_values_ID.vcf --out two_pulse_flexible_pro
 sed -e 's/rs/ID/g' ancestry_corrected_inflated_gemma_gwas.assoc.txt > ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt        
 
 #run plink clump
-plink --file two_pulse_flexible_prop_2_values --clump ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt --clump-p1 0.05 --clump-field FDR --clump-kb 100 --out two_pulse_flexible_prop_2_clumped_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
+plink --file two_pulse_flexible_prop_2_values --clump ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt --clump-p1 6.5830432740603e-05 --clump-field p_wald --clump-kb 100 --out two_pulse_flexible_prop_2_clumped_100kb_43_clumps --allow-no-sex --allow-extra-chr --clump-snp-field ID
 
-
+#value for pvalue chosen by selecting the closest value to 0.05 from the transformed (FDR) vector
 #bfile is 0.9 cutoff for ancestry calls
 #association file from gemma gwas with --miss 0.2
 ```
@@ -510,34 +510,34 @@ Options in effect:
   --allow-extra-chr
   --allow-no-sex
   --clump ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt
-  --clump-field FDR
+  --clump-field p_wald
   --clump-kb 100
-  --clump-p1 0.05
+  --clump-p1 6.5830432740603e-05
   --clump-snp-field ID
   --file two_pulse_flexible_prop_2_values
-  --out two_pulse_flexible_prop_2_clumped_100kb
+  --out two_pulse_flexible_prop_2_clumped_100kb_43_clumps
 
-192953 MB RAM detected; reserving 96476 MB for main workspace.
+257091 MB RAM detected; reserving 128545 MB for main workspace.
 .ped scan complete (for binary autoconversion).
 Performing single-pass .bed write (786261 variants, 282 people).
---file: two_pulse_flexible_prop_2_clumped_100kb-temporary.bed +
-two_pulse_flexible_prop_2_clumped_100kb-temporary.bim +
-two_pulse_flexible_prop_2_clumped_100kb-temporary.fam written.
+--file: two_pulse_flexible_prop_2_clumped_100kb_43_clumps-temporary.bed +
+two_pulse_flexible_prop_2_clumped_100kb_43_clumps-temporary.bim +
+two_pulse_flexible_prop_2_clumped_100kb_43_clumps-temporary.fam written.
 786261 variants loaded from .bim file.
 282 people (0 males, 0 females, 282 ambiguous) loaded from .fam.
-Ambiguous sex IDs written to two_pulse_flexible_prop_2_clumped_100kb.nosex .
+Ambiguous sex IDs written to
+two_pulse_flexible_prop_2_clumped_100kb_43_clumps.nosex .
 Using 1 thread (no multithreaded calculations invoked).
 Before main variant filters, 282 founders and 0 nonfounders present.
 Calculating allele frequencies... done.
 Total genotyping rate is 0.889586.
 786261 variants and 282 people pass filters and QC.
 Note: No phenotypes present.
---clump: 36 clumps formed from 893 top variants.
-Results written to two_pulse_flexible_prop_2_clumped_100kb.clumped
-
+--clump: 43 clumps formed from 1032 top variants.
+Results written to two_pulse_flexible_prop_2_clumped_100kb_43_clumps.clumped .
 
 ```
-
+43 clumps !!
 
 Prep the files to analyze allelic trajectories :
 
@@ -546,62 +546,47 @@ Prep the files to analyze allelic trajectories :
 ```
 #!/bin/bash
 
-file=two_pulse_flexible_prop_2_clumped_100kb.clumped
+file=two_pulse_flexible_prop_2_clumped_100kb_43_clumps.clumped
 
-awk -F ' ' '{ print $1, $4, $5}' $file > temp.bed #extract cols 1 and 4 for position information, 5 for p value
-
-awk '{print ($2 + 1) " " $4 }' temp.bed > pos.bed #remove 1 from position in file
-
-paste temp.bed pos.bed | awk -v OFS='\t' '{print $1, $2, $4, $3}' > full.bed
-
-tail -n +2 full.bed > full2.bed #remove first line
-
-head -n 36 full2.bed > ancestry_gwas_filtered_sites.bed
+awk -v OFS='\t' '{ print $1, $4, $4, $5}' $file > drought_adapted_43clumps.bed #43 loci in this file
 
 ```
 
 (2) filter the vcf file based on the bed file
 
 ```
-#Add header to bed file
-awk '{print
-ancestry_gwas_filtered_sites.bed
-
-
 module load vcftools
 cd /scratch/midway3/rozennpineau/drought/ancestry_hmm/run_full_genome/two_pulse_flexible_prop_2
-vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed ancestry_gwas_filtered_sites_wheader.bed --out two_pulse_flexible_prop_2_values_ID_filtered --recode
+vcftools --vcf two_pulse_flexible_prop_2_values_ID.vcf --bed drought_adapted_43clumps.bed --out drought_adapted_43clumps --recode
 
 
-```
-
-output 
-
-```
+#output 
 Parameters as interpreted:
 	--vcf two_pulse_flexible_prop_2_values_ID.vcf
-	--out two_pulse_flexible_prop_2_values_ID_filtered
+	--out drought_adapted_43clumps
 	--recode
-	--bed ancestry_gwas_filtered_sites_wheader.bed
+	--bed drought_adapted_43clumps.bed
 
 After filtering, kept 282 out of 282 Individuals
 Outputting VCF file...
-	Read 37 BED file entries.
-After filtering, kept 36 out of a possible 786261 Sites
+	Read 44 BED file entries.
+After filtering, kept 43 out of a possible 786261 Sites
 Run Time = 3.00 seconds
 ````
-36 loci in the output vcf file.
+43 loci in the output vcf file.
 
 
 Getting the ancestry calls (in the form of genotypes) from the filtered vcf for more downstream analyses :
+
 ```
 module load htslib
-bgzip -f two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf
-
-tabix -f two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf.gz
-
+bgzip -f drought_adapted_43clumps.recode.vcf
+tabix -f drought_adapted_43clumps.recode.vcf.gz
 act-conda
-bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' two_pulse_flexible_prop_2_values_ID_filtered.recode.vcf.gz > two_pulse_flexible_prop_2_values_ID_filtered_GT.txt #36 loci
+bcftools query -f '%CHROM %POS  %REF  %ALT [ %GT]\n' drought_adapted_43clumps.recode.vcf.gz > drought_adapted_43clumps_GT.txt #43 loci
+
+#download on laptop for further analyses in R.
+scp rozennpineau@midway3.rcc.uchicago.edu:/scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/drought_adapted_43clumps_GT.txt /Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My\ Drive/Work/9.Science/1.DroughtProject/1.analyses/data/6.trajectories/
 ```
 
 
