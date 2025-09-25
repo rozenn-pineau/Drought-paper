@@ -1501,8 +1501,13 @@ cut -d';' -f1 gene_names.tmp | uniq > genes_commongarden_drought_gff.txt
 # Herbarium and climate data analyses
 
 ### Extracting the climate data at each herbarium sample location
-Step (1) - find the closest weather station with mean temperature and precipitation dating back to 1828, which is our earliest herbarium sample. 
-Step (2) - extract the climate data for every year since 1828 for these weather stations. 
+Step (1) - find the closest weather station for data for precipitation and temperature since 1840 (the farthest NOAA cliate report goes). 
+
+Step (2) - extract max temperature and total precipitation for the summmer months (June, July , August) for precipitation and temperature, separately.
+
+Scripts in the following folder : /Users/rozenn/Library/CloudStorage/GoogleDrive-rozennpineau@uchicago.edu/My Drive/Work/9.Science/1.DroughtProject/1.analyses/scripts/current/herbarium_prcp/
+
+Figure5B_analyses.Rmd is the latest version (Sep 25th) and the version we are submitting. 
 
 
 ### Haplotype frequency change with climate change 
