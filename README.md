@@ -764,8 +764,20 @@ cut -f 12 overlap_gwas_cmh_35_gff.bed | grep "Similar" | cut -d" " -f3 | cut -d"
 cut -f 12 overlap_gwas_cmh_gff.bed | grep "Similar" | cut -d" " -f3 | cut -d":" -f1 | uniq > gwas_cmh_genes.txt
 ```
 
+### QQplot and Manhattan plos for CMH scan.
 
+```
+cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought
 
+#file is very big, randomly subset 200,000 lines
+awk 'NR > 1' FDRdrought | shuf -n 200000 > FDRdrought_rdn_subset #remove header
+
+#add header back on
+head -n 1 FDRdrought >  header
+cat header FDRdrought_rdn_subse > FDRdrought_rdn_subset
+#200001 ;ines with header
+# plot qqplot and Manhattan plots from the CMH scan file that has all the info : FDRdrought
+```
 
 
 
