@@ -779,9 +779,42 @@ cat header FDRdrought_rdn_subse > FDRdrought_rdn_subset
 # plot qqplot and Manhattan plots from the CMH scan file that has all the info : FDRdrought
 ```
 
+/project/kreiner/pairedenv_commongarden/normalized_SNPsonly_vcfs/drought_commongarden_merged_normalized_filtsnps_nomiss30.vcf.gz
+
+### Thin result of CMH scan to only keep variants that are not in LD
+Out of the 13,000+ variants, how many are actually independent ?
+Steps: (1) filter vcf based on bed file, (2) make plink family files, (3) thin
+
+(1) filter vcf based on bed file
+```
+#!/bin/bash
+#SBATCH --job-name=filter_vcf
+#SBATCH --output=err.out
+#SBATCH --error=err.in
+#SBATCH --time=5:00:00
+#SBATCH --partition=caslake
+#SBATCH --account=pi-kreiner
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem-per-cpu=10G   # memory per cpu-core
+
+cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought
+module load vcftools
+vcftools --gzvcf /project/kreiner/pairedenv_commongarden/normalized_SNPsonly_vcfs/drought_commongarden_merged_normalized_filtsnps_nomiss30.vcf.gz --bed cmh_015_scaffold.bed --out cmh_015 --recode
+
+#note : use the character (Scaffold_) and not numeric names!
+#note : need for a slurm job, the terminal without a batch job was very slow!
+```
+
+(2)
 
 
+(3)
+assoc=FDR_drought
 
+#without missing loci threshold
+
+plink --file cmh_015.recode --clump $assoc --clump-p1 0.015 --clump-field FDR_p --clump-kb 100 --out cmh_015_clumped_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
 
 
 
