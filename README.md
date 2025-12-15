@@ -883,6 +883,27 @@ Results written to cmh_015_clumped_100kb.clumped
 ```
 **4248 clumps formed from 13652 top variants**
 
+
+# How many of these clumps overlap with the drought loci?
+```
+#Make bed file from CMH clumps
+awk -v OFS="\t" '{print $1, $4, $4}' cmh_015_clumped_100kb.clumped > cmh_015_clumped_100kb.clumped.bed
+head -n 4249 cmh_015_clumped_100kb.clumped.bed > cmh_015_clumped_100kb_cleanclumped.bed #remove last lines that are just tabs
+tail -n 4248 cmh_015_clumped_100kb_cleanclumped.bed > noheader #remove current header
+cat header noheader > cmh_015_clumped_100kb_cleanclumped.bed #adjust header for bcftools to work
+#the headers are not working, remove them ?
+
+#Intersect with drought
+cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought
+gwasbed=/scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/drought_adapted_43clumps_noheader.bed
+cmhbed=cmh_015_clumped_100kb_cleanclumped_noheader.bed
+bedtools intersect -a $gwasbed -b $cmhbed -wa -wb -f 0.99 -r > intersect_clumped_drought_cmh_gwas.bed
+bedtools intersect -a $gwasbed -b $cmhbed > intersect_clumped_drought_cmh_gwas.bed
+#-r 1 -f 1 requires that there is at least 1 bp match, with 100% of the regions matching
+
+
+```
+
 # Drought selection experiment trajectory analyses
 
 ## upload scripts for trajectory analyses
