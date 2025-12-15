@@ -780,6 +780,8 @@ cat header FDRdrought_rdn_subse > FDRdrought_rdn_subset
 ```
 
 /project/kreiner/pairedenv_commongarden/normalized_SNPsonly_vcfs/drought_commongarden_merged_normalized_filtsnps_nomiss30.vcf.gz
+#vcf file with the drought individuals 
+/cds3/kreiner/drought/vcf_dont_touch/merged_numericChr.vcf.gz
 
 ### Thin result of CMH scan to only keep variants that are not in LD
 Out of the 13,000+ variants, how many are actually independent ?
@@ -800,30 +802,86 @@ Steps: (1) filter vcf based on bed file, (2) make plink family files, (3) thin
 
 cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought
 module load vcftools
-vcftools --gzvcf /project/kreiner/pairedenv_commongarden/normalized_SNPsonly_vcfs/drought_commongarden_merged_normalized_filtsnps_nomiss30.vcf.gz --bed cmh_015_scaffold.bed --out cmh_015 --recode
+vcftools --gzvcf drought_merged_numericChr.vcf.gz --bed cmh_015_scaffold.bed --out cmh_015 --recode
 
-#note : use the character (Scaffold_) and not numeric names!
+#note : check if you need to use the character (Scaffold_) and not numeric names!
 #note : need for a slurm job, the terminal without a batch job was very slow!
 ```
 
-(2)
+Took ~30min. 
+I have more than 13,603 variants, maybe several variant options at the same position ?
 
 
-(3)
-assoc=FDR_drought
+(2) make plink files
+```
+module load plink
+vcf=cmh_015.recode.vcf
 
-#without missing loci threshold
+plink --vcf $vcf --out cmh_015_tothin --allow-extra-chr --recode --double-id 
 
-plink --file cmh_015.recode --clump $assoc --clump-p1 0.015 --clump-field FDR_p --clump-kb 100 --out cmh_015_clumped_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
-
-
-
-
+```
 
 
+This was going to work but the ID field in the vcf is missing, adding it now, and making it match with the association file, I need (1) Scaffold_ and (2) SNP changed to ID in the $assoc file
 
+```
+module load htslib
+bgzip cmh_015.recode.vcf
+bcftools tabix cmh_015.recode.vcf.gz
+bcftools annotate --set-id +'%CHROM:%POS' cmh_015.recode.vcf.gz -o cmh_015_ID.vcf.gz
 
+#plink family files
+vcf=cmh_015_ID.vcf.gz
+plink --vcf $vcf --out cmh_015_tothin --allow-extra-chr --recode --double-id 
+```
 
+(3) Clump 
+
+```
+#remove Scaffold from chromosome name in association file
+sed 's/Scaffold_//g' $assoc > FDRdrought_numeric
+#replace SNP with ID in association file
+sed 's/SNP/ID/g' FDRdrought_numeric > FDRdrought_numeric_ID
+
+assoc=FDRdrought_numeric_ID
+plink --file cmh_015_tothin --clump $assoc --clump-p1 0.015 --clump-field FDR_p --clump-kb 100 --out cmh_015_clumped_100kb --allow-no-sex --allow-extra-chr --clump-snp-field ID
+
+#output
+Options in effect:
+  --allow-extra-chr
+  --allow-no-sex
+  --clump FDRdrought_numeric_ID
+  --clump-field FDR_p
+  --clump-kb 100
+  --clump-p1 0.015
+  --clump-snp-field ID
+  --file cmh_015_tothin
+  --out cmh_015_clumped_100kb
+
+257091 MB RAM detected; reserving 128545 MB for main workspace.
+Possibly irregular .ped line.  Restarting scan, assuming multichar alleles.
+.ped scan complete (for binary autoconversion).
+Performing single-pass .bed write (14096 variants, 282 people).
+--file: cmh_015_clumped_100kb-temporary.bed +
+cmh_015_clumped_100kb-temporary.bim + cmh_015_clumped_100kb-temporary.fam
+written.
+14096 variants loaded from .bim file.
+282 people (0 males, 0 females, 282 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to cmh_015_clumped_100kb.nosex .
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 282 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.986247.
+14096 variants and 282 people pass filters and QC.
+Note: No phenotypes present.
+Warning: '6:16669558' is missing from the main dataset, and is a top variant.
+Warning: '8:10035631' is missing from the main dataset, and is a top variant.
+Warning: '9:17730933' is missing from the main dataset, and is a top variant.
+116748 more top variant IDs missing; see log file.
+--clump: 4248 clumps formed from 13652 top variants.
+Results written to cmh_015_clumped_100kb.clumped
+```
+**4248 clumps formed from 13652 top variants**
 
 # Drought selection experiment trajectory analyses
 
@@ -1570,4 +1628,43 @@ We identified a few different sites that track climate.
 Scrit for pairwise comparisons : order the pairwise distance between samples by ascending order; find the two closest samples, set aside; find the closest sample of the next one in the list, set aside; repeat until all samples have been used (23 pairs); calculate haplotype frequency change and climate change, test linear relationship, record if significant **and** postisive; go back to the list and start with the second sample this time, repeat (146 times for 146 possible pairs with distance in km >0 and < 100). 
 
 For temperature max  : [run_pairwise_data.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/run_pairwise_data.R)
+
+
+
+### Uploading data to NCBI - SRA
+
+Put the samples from the metadata table in a single folder, based on a list of sample names:
+```
+cd /cds3/kreiner/drought/raw/fastq/samps_for_SRA
+xargs cp -t samps_for_SRA/ < sra_samp_list
+```
+
+tranfer files with ftp
+```
+ftp -i ftp-private.ncbi.nlm.nih.gov #establish connection
+subftp #Username
+CrasHeshyevVafivgud2 #Password
+cd uploads/rozenn.m.pineau_gmail.com_ntK4s0M0
+cd drought_fastq
+hot to keep  #upload very file
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
