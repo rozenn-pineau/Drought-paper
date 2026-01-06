@@ -904,6 +904,72 @@ bedtools intersect -a $gwasbed -b $cmhbed > intersect_clumped_drought_cmh_gwas.b
 
 ```
 
+# Randomization analysis for CMH scan / drought variants taking into account LD
+
+### Step 1
+Calculate the length of ancestry blocks for the 893 drought adapted-loci : [calculate_ancestry_block_lengths.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths.R)
+This intakes the full ancestry file, as well as the bed file with the information for the 893 loci. 
+It ouputs a file that had 893 rows (drought-adapted locus) and 280 columns (sample), with the ancestry block length that surrounds the focal SNP.
+
+#### Quick check - how long is each chromosome
+
+For one chromosome:
+```
+tail -n 1 10.vcf | awk '{print $1,$2}'
+```
+Loop through all vcfs:
+```
+for i in {1..16}; do
+    tail -n 1 ${i}.vcf | awk '{print $1,$2}' >> chr_length.txt
+done
+```
+
+
+
+### Step 2
+Calculate the length of ancestry blocks for the while genome.
+I am working here : 
+/scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/randomization
+
+goal of current script : calculate the lengths of ancestry blocks along the genome
+
+Split file into chromosomes first:
+```
+#!/bin/bash
+
+#goal : to separate the vcf file into chromosomes for faster coding 
+
+for chr in {1..16}; do
+        echo "processing: $chr "
+        awk -v awk_var="$chr" ' $1== awk_var ' two_pulse_flexible_prop_2_values_ID.vcf > ${chr}.vcf
+done
+```
+
+
+This is the script, that works per chromosome  : [calculate_ancestry_block_lengths_genome.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths_genome.R)
+
+Now, I would like to add the chromosome info in the first column of the output file:
+
+For one chromosome:
+```
+awk '{print 1,$1,$2,$3,$4}' ancestry_block_info_append_chr1.txt
+```
+Loop through all:
+```
+for i in {1..16}; do
+    awk -v chr=$i '{print chr,$1,$2,$3,$4}' ancestry_block_info_append_chr${i}.txt >> ancestry_block_len_genome.txt
+done
+```
+Final file with all chromosomes and individuals has 641839 lines. 
+
+
+
+
+
+
+
+
+
 # Drought selection experiment trajectory analyses
 
 ## upload scripts for trajectory analyses
@@ -1670,15 +1736,66 @@ cd drought_fastq
 hot to keep  #upload very file
 ```
 
+# Estimated coverage and read depth for both herbarium and contemporary datasets
+
+### Estimated coverage for contemporary samples
+From the fastq files:
+
+For one file
+```
+READ_COUNT=$(zcat AT1_10_1.allseq.fastq.gz | wc -l)
+NUM_READS=$((READ_COUNT / 4))
+READ_LENGTH=150 # Adjust if needed
+GENOME_SIZE=4300000 Mb #4.3 Mb
+COVERAGE=$(( (NUM_READS * READ_LENGTH ) / GENOME_SIZE )) 
+```
+
+Looping through all vcfs: 
+```
+# Set read length and genome size (in bp, not Mb)
+READ_LENGTH=150           # Adjust if needed
+GENOME_SIZE=4300000       # 4.3 Mb = 4,300,000 bp
+
+# Output file for coverage per sample
+OUTPUT_FILE="estimated_coverage_allseq.txt"
+
+# Write header
+echo -e "Sample\tCoverage" > $OUTPUT_FILE
+
+# Loop through all fastq files
+for fq in *_1.allseq.fastq.gz; do
+    SAMPLE=$(basename "$fq" _1.allseq.fastq.gz)      # Adjust suffix as per your samples
+    READ_COUNT=$(zcat "$fq" | wc -l)
+    NUM_READS=$((READ_COUNT / 4))
+    COVERAGE=$(( (NUM_READS * READ_LENGTH *2 ) / GENOME_SIZE ))
+    echo -e "${SAMPLE}\t${COVERAGE}" >> $OUTPUT_FILE
+done
+```
+### Actual coverage for contemporary samples
+Calculated on the bam files:
+
+For one file
+```
+samtools depth AT19_608_193_2.dd.bam | awk '{sum+=$3} END {print "Average Depth:", sum/NR}'
+```
+For all files in folder :
+```
+OUTPUT_FILE="average_bam_depths.txt"
+echo -e "Sample\tAverage_Depth" > $OUTPUT_FILE
+
+for bam in *.bam; do
+    SAMPLE=$(basename "$bam" .bam)
+    AVG_DEPTH=$(samtools depth "$bam" | awk '{sum+=$3} END {if (NR>0) print sum/NR; else print 0}')
+    echo -e "${SAMPLE}\t${AVG_DEPTH}" >> $OUTPUT_FILE
+done
+```
 
 
 
 
 
 
-
-
-
+For the herbarium samples : 
 
 
 
