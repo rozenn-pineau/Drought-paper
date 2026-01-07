@@ -1791,14 +1791,15 @@ done
 ```
 
 
+### Estimating genome size 
+I am using seqkit on the cluster :
+```
+(/project/kreiner) [rozennpineau@midway3-login4 genome]$ seqkit stats Atub_193_hap2.fasta
+file                 format  type  num_seqs      sum_len  min_len    avg_len     max_len
+Atub_193_hap2.fasta  FASTA   DNA      1,060  654,703,812    1,000  617,645.1  59,452,825
+```
 
-
-
-
-For the herbarium samples : 
-
-
-
+Genome size is : 654,703,812 bp !
 
 
 
