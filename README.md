@@ -1802,6 +1802,15 @@ Atub_193_hap2.fasta  FASTA   DNA      1,060  654,703,812    1,000  617,645.1  59
 Genome size is : 654,703,812 bp !
 
 
+### Heritability
+pve estimate in the null model = 0.105978
+## se(pve) in the null model = 0.0975972
+## vg estimate in the null model = 1.989
+## ve estimate in the null model = 8.88904
+File: /cds3/kreiner/drought/analyses/ancestry_hmm/gemma_gwas/two_pulse_flexible_prop_2/cutoff08/ancestry_corrected_gemma_gwas.log.txt
+
+
+
 
 
 
