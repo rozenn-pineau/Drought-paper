@@ -1809,7 +1809,7 @@ pve estimate in the null model = 0.105978
 ## ve estimate in the null model = 8.88904
 File: /cds3/kreiner/drought/analyses/ancestry_hmm/gemma_gwas/two_pulse_flexible_prop_2/cutoff08/ancestry_corrected_gemma_gwas.log.txt
 
-# re-clump with larger window
+## re-clump with larger window
 ### Make plink family files
 ```
 vcf=/scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/two_pulse_flexible_prop_2_values_ID.vcf
@@ -1837,5 +1837,28 @@ gff=/project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff
 bed=drought_adapted_1Mb_36clumps_scaffold_names.bed
 bedtools intersect -b $bed -a $gff > intersect_drought_adapted_1Mb_36clumps_gff_enriched_genes.txt
 ```
+
+## LD decay rate
+I will try to assess the LD decay rate using a tool (https://github.com/BGI-shenzhen/PopLDdecay):
+
+```
+git clone https://github.com/hewm2008/PopLDdecay.git 
+cd PopLDdecay; chmod 755 configure; ./configure;
+make;
+mv PopLDdecay  bin/;    #     [rm *.o]
+```
+
+```
+#run on vcf file directly
+cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/ld_decay
+./bin/PopLDdecay    -InVCF  /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/two_pulse_flexible_prop_2_values_ID.vcf.gz  -OutStat LDdecay 
+#figure for one population
+perl  bin/Plot_OnePop.pl  -inFile   LDdecay.stat.gz  -output  Fig
+
+```
+
+
+
+
 
 
