@@ -1809,10 +1809,33 @@ pve estimate in the null model = 0.105978
 ## ve estimate in the null model = 8.88904
 File: /cds3/kreiner/drought/analyses/ancestry_hmm/gemma_gwas/two_pulse_flexible_prop_2/cutoff08/ancestry_corrected_gemma_gwas.log.txt
 
+# re-clump with larger window
+### Make plink family files
+```
+vcf=/scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/two_pulse_flexible_prop_2_values_ID.vcf
+#make plink family files and create ID based on position information
+plink --vcf $vcf --out two_pulse_flexible_prop_2_values --allow-extra-chr --recode --double-id 
+```
+### Run plink with 1Mb window
+```
+assoc=ancestry_corrected_inflated_gemma_gwas_ID.assoc.txt
+#run plink clump
+plink --file two_pulse_flexible_prop_2_values --clump $assoc --clump-p1 6.5830432740603e-05 --clump-field p_wald --clump-kb 1000 --out two_pulse_flexible_prop_2_clumped_1mM --allow-no-sex --allow-extra-chr --clump-snp-field ID
 
+#clump: 36 clumps formed from 1032 top variants
+```
+### Intersect with gff
+```
+#extract bed file
+file=two_pulse_flexible_prop_2_clumped_1mM.clumped
+awk -v OFS='\t' '{ print $1, $4, $4, $5}' $file > drought_adapted_1Mb_36clumps.bed 
+#update name to character for comparison with gff
+awk -F'\t' -vOFS='\t' '{ $1 = "Scaffold_" $1}1' drought_adapted_1Mb_36clumps.bed > drought_adapted_1Mb_36clumps_scaffold_names.bed
 
-
-
-
+#intersect with gff
+gff=/project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff
+bed=drought_adapted_1Mb_36clumps_scaffold_names.bed
+bedtools intersect -b $bed -a $gff > intersect_drought_adapted_1Mb_36clumps_gff_enriched_genes.txt
+```
 
 
