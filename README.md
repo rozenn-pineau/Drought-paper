@@ -1858,7 +1858,27 @@ perl  bin/Plot_OnePop.pl  -inFile   LDdecay.stat.gz  -output  Fig
 ```
 
 
+### Admixture for K=1 to 10
+The run is taking too long on the cluster. I am trying to reduce the dataset size by pruning for LD. 
 
+```
+#--indep-pairwise <window size>['kb'] <step size (variant ct)> <r^2 threshold>
+#50 5 0.5 would a) consider a window of 50 SNPs, b) calculate LD between each pair of SNPs in the window, b) remove one of a pair of SNPs if the LD is greater than 0.5, c) shift the window 5 SNPs forward and repeat the procedure.
 
+plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt \
+      --indep-pairwise 50 5 0.2 \
+      --out commongarden_allfiltsnps_193_hap2_numericChr_filt.pruned
+plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt \
+      --extract commongarden_allfiltsnps_193_hap2_numericChr_filt.pruned.prune.in \
+      --make-bed \
+      --out commongarden_allfiltsnps_193_hap2_numericChr_filt_LDpruned
+
+#Then remove minor allele frequencies <0.05
+plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt_LDpruned \
+      --maf 0.05 \
+      --make-bed \
+      --out commongarden_allfiltsnps_193_hap2_numericChr_filt_LDpruned_maf05
+
+```
 
 
