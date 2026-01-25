@@ -1814,7 +1814,9 @@ File: /cds3/kreiner/drought/analyses/ancestry_hmm/gemma_gwas/two_pulse_flexible_
 ```
 vcf=/scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/two_pulse_flexible_prop_2_values_ID.vcf
 #make plink family files and create ID based on position information
-plink --vcf $vcf --out two_pulse_flexible_prop_2_values --allow-extra-chr --recode --double-id 
+plink --vcf $vcf --out two_pulse_flexible_prop_2_values --allow-extra-chr --recode --double-id
+
+
 ```
 ### Run plink with 1Mb window
 ```
@@ -1848,6 +1850,7 @@ make;
 mv PopLDdecay  bin/;    #     [rm *.o]
 ```
 
+This was run on the ancestry matrix:
 ```
 #run on vcf file directly
 cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/ld_decay
@@ -1856,7 +1859,15 @@ cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drou
 perl  bin/Plot_OnePop.pl  -inFile   LDdecay.stat.gz  -output  Fig
 
 ```
+On the genotype matrix:
+```
+#run on vcf file directly
+cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/ld_decay/PopLDdecay/
+./bin/PopLDdecay -InVCF /scratch/midway3/rozennpineau/drought/admixture/merged_numericChr.vcf.gz -OutStat LDdecay 
+#figure for one population
+perl  bin/Plot_OnePop.pl  -inFile   LDdecay.stat.gz  -output  Fig
 
+```
 
 ### Admixture for K=1 to 10
 The run is taking too long on the cluster. I am trying to reduce the dataset size by pruning for LD. 
@@ -1864,6 +1875,18 @@ The run is taking too long on the cluster. I am trying to reduce the dataset siz
 ```
 #--indep-pairwise <window size>['kb'] <step size (variant ct)> <r^2 threshold>
 #50 5 0.5 would a) consider a window of 50 SNPs, b) calculate LD between each pair of SNPs in the window, b) remove one of a pair of SNPs if the LD is greater than 0.5, c) shift the window 5 SNPs forward and repeat the procedure.
+
+#Make plink family files from vcf
+vcf=merged_numericChr.vcf.gz
+plink --vcf $vcf --out merged_numericChr --allow-extra-chr --recode --double-id
+#make bed
+plink --file merged_numericChr --make-bed --out merged_numericChr
+
+#Remove minor allele frequencies <0.05
+plink --bfile merged_numericChr \
+      --maf 0.05 \
+      --make-bed \
+      --out merged_numericChr_maf05
 
 plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt \
       --indep-pairwise 50 5 0.2 \
@@ -1873,12 +1896,69 @@ plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt \
       --make-bed \
       --out commongarden_allfiltsnps_193_hap2_numericChr_filt_LDpruned
 
-#Then remove minor allele frequencies <0.05
-plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt_LDpruned \
-      --maf 0.05 \
-      --make-bed \
-      --out commongarden_allfiltsnps_193_hap2_numericChr_filt_LDpruned_maf05
+
 
 ```
 
+### LD decay rate
+```
+#!/bin/bash
+# Save as: clump_lead_regions.sh
+
+infile="two_pulse_flexible_prop_2_clumped_100kb_43_clumps.clumped"
+outfile="clump_summary.txt"
+
+awk '
+/^CHR/ {next} /^[ \t]*$/ {next}
+{
+  lead_snp=$3
+  split(lead_snp, arr, ":")
+  chr=arr[1]
+
+  # Re-join fields from 12th onwards for variant list
+  snplist=""
+  for(i=12;i<=NF;i++) snplist=snplist $i " "
+  n=0
+  numvar=0
+  minbp=0; maxbp=0;
+  # regex: chr:basepair(
+  while (match(snplist, chr":[0-9]+\\([0-9]+\\)")) {
+    tag = substr(snplist, RSTART, RLENGTH)
+    # extract only the numeric bp, removing parentheses
+    sub("^"chr":","",tag)
+    sub("\\(.*$","",tag)
+    bp=tag+0
+    if (n==0 || bp < minbp) minbp=bp
+    if (n==0 || bp > maxbp) maxbp=bp
+    numvar++
+    n++
+    snplist=substr(snplist, RSTART+RLENGTH)
+  }
+  if(numvar>0)
+    print chr "\t" minbp "\t" maxbp "\t" maxbp-minbp "\t" numvar
+}
+' "$infile" > "$outfile"
+
+# Add header
+sed -i '1i chr\tstart_bp\tend_bp\tlength_bp\tn_variants' "$outfile"
+echo "Output written to $outfile"
+```
+
+How may genes per clump:
+
+```
+cd /scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2
+
+#remove header from info file, turn to bed
+tail -43 /scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/clump_summary.txt > /scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/clump_summary.bed
+#add Scaffold to first column
+awk -F'\t' -vOFS='\t' '{ $1 = "Scaffold_" $1}1' clump_summary.bed > clump_summary_scaffold_names.bed
+
+#intersect with gff
+
+gff=/project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff
+bed=/scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/clump_summary_scaffold_names.bed
+bedtools intersect -b $bed -a $gff > intersect_43clumps_gff.txt
+
+```
 
