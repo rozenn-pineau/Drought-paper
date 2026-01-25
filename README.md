@@ -1888,15 +1888,14 @@ plink --bfile merged_numericChr \
       --make-bed \
       --out merged_numericChr_maf05
 
-plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt \
+plink --bfile merged_numericChr_maf05 \
       --indep-pairwise 50 5 0.2 \
-      --out commongarden_allfiltsnps_193_hap2_numericChr_filt.pruned
-plink --bfile commongarden_allfiltsnps_193_hap2_numericChr_filt \
-      --extract commongarden_allfiltsnps_193_hap2_numericChr_filt.pruned.prune.in \
+      --out merged_numericChr_maf05.pruned
+
+plink --bfile merged_numericChr_maf05 \
+      --extract merged_numericChr_maf05.pruned.prune.in \
       --make-bed \
-      --out commongarden_allfiltsnps_193_hap2_numericChr_filt_LDpruned
-
-
+      --out merged_numericChr_maf05_LDpruned
 
 ```
 
