@@ -1867,7 +1867,7 @@ plink \
   --bfile merged_numericChr_maf05 \
   --indep-pairwise 2000 1 0.99 \ #no LD filtering
   --out merged_numericChr_maf05_thin2kb
-#running in a batch job because it was taking too lon
+#running in a batch job because it was taking too long
 
 #extract thinned SNPs from initial file
 plink \
