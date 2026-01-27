@@ -1861,6 +1861,36 @@ perl  bin/Plot_OnePop.pl  -inFile   LDdecay.stat.gz  -output  Fig
 ```
 On the genotype matrix:
 ```
+#Run of MAF < 0.05 file
+# Thin to keep 1 SNP every 2kb regardless of LD to decrease run time
+plink \
+  --bfile merged_numericChr_maf05 \
+  --indep-pairwise 2000 1 0.99 \ #no LD filtering
+  --out merged_numericChr_maf05_thin2kb
+#running in a batch job because it was taking too lon
+
+#extract thinned SNPs from initial file
+plink \
+  --bfile merged_numericChr_maf05_thin2kb \
+  --extract merged_numericChr_maf05_thin2kb.prune.in \
+  --make-bed \
+  --out merged_numericChr_maf05_thin2kb
+
+#Keep only if present in >80% of samples
+plink \
+  --bfile merged_numericChr_maf05_thin2kb \
+  --geno 0.2 \
+  --make-bed \
+  --out merged_numericChr_maf05_thin2kb_miss80
+
+#convert back to vcf for PopLDdecay
+plink \
+  --bfile merged_numericChr_maf05_thin2kb_miss80 \
+  --recode vcf bgz \
+  --out merged_numericChr_maf05_thin2kb_miss80
+
+
+
 #run on vcf file directly
 cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/ld_decay/PopLDdecay/
 ./bin/PopLDdecay -InVCF /scratch/midway3/rozennpineau/drought/admixture/merged_numericChr.vcf.gz -OutStat LDdecay 
@@ -1958,6 +1988,18 @@ awk -F'\t' -vOFS='\t' '{ $1 = "Scaffold_" $1}1' clump_summary.bed > clump_summar
 gff=/project/kreiner/data/genome/Atub_193_hap2.all.sorted.gff
 bed=/scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/clump_summary_scaffold_names.bed
 bedtools intersect -b $bed -a $gff > intersect_43clumps_gff.txt
+
+#use bedtools to extract the number of overlap between the intersect file and the clump
+
+#filter for the gene lines only
+awk '$3 == "gene" ' intersect_43clumps_gff.txt > intersect_43clumps_gff_gene.txt
+#261 lines
+
+#then look for length of overlaps
+bed=/scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/clump_summary_scaffold_names.bed
+gff=/scratch/midway2/rozennpineau/drought/two_pulse_flexible_prop_2/intersect_43clumps_gff_gene.txt
+bedtools intersect -a $bed -b $gff -c
+#-c For each feature in A, report the number of overlapping features in B
 
 ```
 
