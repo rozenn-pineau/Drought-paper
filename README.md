@@ -904,67 +904,6 @@ bedtools intersect -a $gwasbed -b $cmhbed > intersect_clumped_drought_cmh_gwas.b
 
 ```
 
-# Randomization analysis for CMH scan / drought variants taking into account LD
-
-### Step 1
-Calculate the length of ancestry blocks for the 893 drought adapted-loci : [calculate_ancestry_block_lengths.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths.R)
-This intakes the full ancestry file, as well as the bed file with the information for the 893 loci. 
-It ouputs a file that had 893 rows (drought-adapted locus) and 280 columns (sample), with the ancestry block length that surrounds the focal SNP.
-
-#### Quick check - how long is each chromosome
-
-For one chromosome:
-```
-tail -n 1 10.vcf | awk '{print $1,$2}'
-```
-Loop through all vcfs:
-```
-for i in {1..16}; do
-    tail -n 1 ${i}.vcf | awk '{print $1,$2}' >> chr_length.txt
-done
-```
-
-
-
-### Step 2
-Calculate the length of ancestry blocks for the while genome.
-I am working here : 
-/scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/randomization
-
-goal of current script : calculate the lengths of ancestry blocks along the genome
-
-Split file into chromosomes first:
-```
-#!/bin/bash
-
-#goal : to separate the vcf file into chromosomes for faster coding 
-
-for chr in {1..16}; do
-        echo "processing: $chr "
-        awk -v awk_var="$chr" ' $1== awk_var ' two_pulse_flexible_prop_2_values_ID.vcf > ${chr}.vcf
-done
-```
-
-
-This is the script, that works per chromosome  : [calculate_ancestry_block_lengths_genome.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths_genome.R)
-
-Now, I would like to add the chromosome info in the first column of the output file:
-
-For one chromosome:
-```
-awk '{print 1,$1,$2,$3,$4}' ancestry_block_info_append_chr1.txt
-```
-Loop through all:
-```
-for i in {1..16}; do
-    awk -v chr=$i '{print chr,$1,$2,$3,$4}' ancestry_block_info_append_chr${i}.txt >> ancestry_block_len_genome.txt
-done
-```
-Final file with all chromosomes and individuals has 641839 lines. 
-
-
-
-
 
 
 
@@ -2003,44 +1942,113 @@ bedtools intersect -a $bed -b $gff -c
 
 ```
 
-### Randomization CMH-GWAS analyses
+# Randomization analysis for CMH scan / drought variants taking into account LD
+## Make dataset
+### Step 1
+Calculate the length of ancestry blocks for the 893 drought adapted-loci : [calculate_ancestry_block_lengths.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths.R)
+This intakes the full ancestry file, as well as the bed file with the information for the 893 loci. 
+It ouputs a file that had 893 rows (drought-adapted locus) and 280 columns (sample), with the ancestry block length that surrounds the focal SNP.
 
-49338567 lines in original bed file for CMH
-94008 after filtering for FDR <0.01
-383650 after filtering for FDR <0.05
-First pass with FDR 0.01
+#### Quick check - how long is each chromosome
+
+For one chromosome:
+```
+tail -n 1 10.vcf | awk '{print $1,$2}'
+```
+Loop through all vcfs:
+```
+for i in {1..16}; do
+    tail -n 1 ${i}.vcf | awk '{print $1,$2}' >> chr_length.txt
+done
+```
 
 
-** Step (1)
+
+### Step 2
+Calculate the length of ancestry blocks for the while genome.
+I am working here : 
+/scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/randomization
+
+goal of current script : calculate the lengths of ancestry blocks along the genome
+
+Split file into chromosomes first:
+```
+#!/bin/bash
+
+#goal : to separate the vcf file into chromosomes for faster coding 
+
+for chr in {1..16}; do
+        echo "processing: $chr "
+        awk -v awk_var="$chr" ' $1== awk_var ' two_pulse_flexible_prop_2_values_ID.vcf > ${chr}.vcf
+done
+```
+
+
+This is the script, that works per chromosome  : [calculate_ancestry_block_lengths_genome.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths_genome.R)
+
+Now, I would like to add the chromosome info in the first column of the output file:
+
+For one chromosome:
+```
+awk '{print 1,$1,$2,$3,$4}' ancestry_block_info_append_chr1.txt
+```
+Loop through all:
+```
+for i in {1..16}; do
+    awk -v chr=$i '{print chr,$1,$2,$3,$4}' ancestry_block_info_append_chr${i}.txt >> ancestry_block_len_genome.txt
+done
+```
+Final file with all chromosomes and individuals has 641839 lines. 
+
+Use this file to calculate the ancestry block length for each SNP: 
+
+Example script here [calculate_ancestry_block_lengths_v2_246-260.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths_v2_246-260.R)
+
+ Had to run this script per group of 15 samples (takes 1.5 days for 15 samples).
+ Concatenate all the files together, than calculate the mean per SNP:
+
+```
+awk '
+{
+  for (i=1; i<=NF; i++) {
+    sum[i] += $i
+  }
+}
+END {
+  for (i=1; i<=NF; i++) {
+    printf "%f%s", sum[i]/NR, (i<NF ? OFS : ORS)
+  }
+}' ancestry_block_len_282x786257_append_1-280.txt > ancestry_block_mean.txt
+
+#transpose
+awk '{for (i=1;i<=NF;i++) print $i}' ancestry_block_mean.txt > ancestry_block_mean_tr.txt
+#add header
+cat header ancestry_block_mean_tr.txt > ancestry_block_mean_786257.txt
+
+#create bed file with loci info
+awk '{print $1, $2, $3}' OFS='\t' full_genome_anc_block_mean_len_tab.bed > tmp
+paste tmp to_append/ancestry_block_mean_786257.txt > ancestry_block_mean_786257.bed
+
+```
+## Step 3: Create bed files by randomly sampling SNPs with similar block size distribution
+
+Rscript : [create_beds.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/create_beds.R)
+
 In /scratch/midway3/rozennpineau/drought/randomization/create_bed
 Run the R script that creates bed files with a similar block size distribution as the observed block size distribution for our 893 GWAS variants
 Precision of +- 500 base pairs
 Distribution of lengths in observed data :    
 Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  128956  351090  374786  475070  516082 2439540 
-```
-#Rscript
-#goal : to create bed files that have a similar distribution of ancestry block lengths as the observed drought bed file
 
-#full <- read.table("../full_genome_anc_block_mean_len_tab_subset.bed", sep = "\t", header = F) #change to header = T with full file
-full <- read.table("../full_genome_anc_block_mean_len_tab.bed", sep = "\t", header = T)
-obs <- read.table("observed_anc_block_len_distr.txt", sep = "\t", header = T) #plus or minus 100 bp
-precision <- 500
 
-for (perm in 1:100) {
-        store_bed <- c()
-        for (i in 1:length(obs$mid)) {
-                idx_pool <- which(full[,4] > obs$mid[i]-precision & full[,4] < obs$mid[i]+precision)
-                if (length(idx_pool)<1){break} #no matches
-                idx_local <- sample(idx_pool,obs$count[i],replace=F)
-                cur_bed <- full[idx_local,]
-                store_bed <- rbind(store_bed, cur_bed)
-                write.table(store_bed, paste("random_anc_block_", perm,".bed", sep = ""), sep = "\t", col.names = F, row.names = F, quote = F )
-        }
-}
-```
+## Step 4: find overlap with CMH using bedtools
+49338567 lines in original bed file for CMH
+94008 after filtering for FDR <0.01
+383650 after filtering for FDR <0.05
+First pass with FDR 0.01
 
-** Step (2)
+
 In /scratch/midway3/rozennpineau/drought/randomization/calculate_overlap
 Intersect CMH (FDR <0.1) and random beds and calculate number of overlapping loci
 ```
