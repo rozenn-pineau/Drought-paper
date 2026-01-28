@@ -1871,7 +1871,7 @@ plink \
 
 #extract thinned SNPs from initial file
 plink \
-  --bfile merged_numericChr_maf05_thin2kb \
+  --bfile merged_numericChr_maf05 \
   --extract merged_numericChr_maf05_thin2kb.prune.in \
   --make-bed \
   --out merged_numericChr_maf05_thin2kb
@@ -1893,7 +1893,7 @@ plink \
 
 #run on vcf file directly
 cd /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/ld_decay/PopLDdecay/
-./bin/PopLDdecay -InVCF /scratch/midway3/rozennpineau/drought/admixture/merged_numericChr.vcf.gz -OutStat LDdecay 
+./bin/PopLDdecay -InVCF /scratch/midway3/rozennpineau/drought/admixture/merged_numericChr_maf05_thin2kb_miss80.vcf.gz -OutStat LDdecay 
 #figure for one population
 perl  bin/Plot_OnePop.pl  -inFile   LDdecay.stat.gz  -output  Fig
 
