@@ -1943,6 +1943,10 @@ bedtools intersect -a $bed -b $gff -c
 ```
 
 # Randomization analysis for CMH scan / drought variants taking into account LD
+
+** How many CMH scan SNPs overlap with the ancestry tracks in which the 43 clumps lead SNP for each are?
+(1) extract bed file that has start and end pos for each 43 clumps
+
 ## Make dataset
 ### Step 1
 Calculate the length of ancestry blocks for the 893 drought adapted-loci : [calculate_ancestry_block_lengths.R](https://github.com/rozenn-pineau/Drought-paper/blob/main/calculate_ancestry_block_lengths.R)
@@ -1965,7 +1969,7 @@ done
 
 
 ### Step 2
-Calculate the length of ancestry blocks for the while genome.
+Calculate the length of ancestry blocks for the whole genome.
 I am working here : 
 /scratch/midway2/rozennpineau/drought/compare_sites_commongarden_drought/drought/randomization
 
